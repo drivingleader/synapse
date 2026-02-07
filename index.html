@@ -35,16 +35,18 @@
         .btn-press { transition: transform 0.05s, background-color 0.2s; }
         .btn-press:active { transform: scale(0.96); }
 
-        .dimmed-text { opacity: 0.5; font-size: 0.85rem; font-weight: 400; margin-bottom: 0.2rem; }
-        .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        /* Typography Improved */
+        .dimmed-text { opacity: 0.4; font-size: 0.9rem; font-weight: 400; line-height: 1.4; }
+        .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(251, 191, 36, 0.2); display: block; margin: 0.5rem 0; }
         
         @media (max-height: 700px) {
-            .highlight-text { font-size: 1.1rem; }
-            #sign-visual-container { height: 110px !important; }
+            .highlight-text { font-size: 1.2rem; }
+            #sign-visual-container { height: 100px !important; }
             #card { padding: 1rem; }
+            .start-content { transform: scale(0.9); }
         }
         @media (min-height: 701px) {
-            .highlight-text { font-size: 1.4rem; }
+            .highlight-text { font-size: 1.5rem; }
         }
 
         .boss-mode { border: 2px solid #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
@@ -57,7 +59,7 @@
             width: 0; height: 0;
             border-left: 60px solid transparent;
             border-right: 60px solid transparent;
-            border-bottom: 104px solid #cc0000; /* Red Border */
+            border-bottom: 104px solid #cc0000;
             position: relative;
             margin-bottom: 10px;
         }
@@ -66,7 +68,7 @@
             top: 6px; left: -45px;
             border-left: 45px solid transparent;
             border-right: 45px solid transparent;
-            border-bottom: 78px solid white; /* White Inner */
+            border-bottom: 78px solid white;
         }
         .sign-danger i {
             position: absolute; top: 45px; left: -50%; transform: translateX(-50%);
@@ -91,7 +93,7 @@
             border: 4px solid white;
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 0 2px #0055cc; /* Outer ring visual fix */
+            box-shadow: 0 0 0 2px #0055cc;
         }
         .sign-obligation i { color: white; font-size: 50px; }
 
@@ -163,15 +165,27 @@
     </div>
 
     <!-- Main Card -->
-    <div id="quiz-container" class="flex-1 w-full flex flex-col justify-center relative my-2 min-h-0">
+    <div id="quiz-container" class="flex-1 w-full flex flex-col justify-center relative my-2 min-h-0 w-full">
         
         <!-- Start Screen -->
-        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 rounded-3xl p-6 text-center z-50 shadow-2xl border border-slate-700">
+        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 rounded-3xl p-6 text-center z-50 shadow-2xl border border-slate-700 start-content">
             <div class="mb-6">
                 <i class="fas fa-bolt text-5xl text-yellow-500 mb-4 animate-bounce"></i>
                 <h1 class="text-4xl font-black mb-1 leading-none"><span class="gradient-text">QUIZ<br>HACKER</span></h1>
-                <h2 class="text-xs font-bold text-slate-500 tracking-[0.2em] mt-2">NO IMAGES • PURE CSS</h2>
+                <h2 class="text-xs font-bold text-slate-500 tracking-[0.2em] mt-2">METODO 80/20</h2>
             </div>
+            
+            <div class="bg-slate-900/50 p-4 rounded-xl mb-6 w-full border border-slate-700 text-left">
+                <div class="flex items-start gap-3 mb-3">
+                    <i class="fas fa-eye text-blue-400 mt-1"></i>
+                    <p class="text-xs text-slate-300">Leggi solo la <strong>parte evidenziata</strong>. È il cuore della domanda.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-robot text-yellow-400 mt-1"></i>
+                    <p class="text-xs text-slate-300"><strong>Nota:</strong> Le immagini dei segnali sono ricostruzioni digitali semplificate. All'esame ufficiale potrebbero variare.</p>
+                </div>
+            </div>
+
             <div class="space-y-3 w-full">
                 <button onclick="startGame()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-500 active:bg-yellow-700 rounded-2xl font-bold text-lg shadow-lg shadow-yellow-900/50 btn-press flex items-center justify-center gap-3 text-white">
                     <i class="fas fa-play"></i> Inizia Test
@@ -250,72 +264,63 @@
     </div>
 
     <script>
-        // --- DATABASE: CSS RECREATABLE SIGNS & THEORY ONLY ---
-        // Icons: FontAwesome 6 classes (without 'fa-')
+        // --- DATABASE AGGIORNATO: NO SPOILER ---
+        // highlight: deve essere una sottostringa ESATTA di text.
+        // icons: usando fa-bus-simple per evitare confusione.
         const database = [
-            // --- THEORY (Veicoli, Patente, Norme) ---
-            { text: "La patente di categoria B abilita a condurre le macchine agricole operatrici", isTrue: true, type: "theory", icon: "tractor", highlight: "PATENTE B macchine AGRICOLE" },
-            { text: "L'autovettura è un veicolo con massimo nove posti compreso il conducente", isTrue: true, type: "theory", icon: "car", highlight: "MAX 9 POSTI" },
-            { text: "I ciclomotori hanno cilindrata fino a 50 cm³", isTrue: true, type: "theory", icon: "motorcycle", highlight: "CICLOMOTORI 50 cm³" },
-            { text: "Il casco è obbligatorio per tutti i conducenti di motocicli", isTrue: true, type: "theory", icon: "helmet-safety", highlight: "CASCO OBBLIGATORIO" },
-            { text: "È vietato usare il cellulare alla guida senza auricolare", isTrue: true, type: "theory", icon: "mobile-screen", highlight: "VIETATO CELLULARE" },
-            { text: "La revisione dell'auto va fatta dopo 4 anni dalla prima immatricolazione", isTrue: true, type: "theory", icon: "wrench", highlight: "REVISIONE 4 ANNI" },
-            { text: "I neopatentati devono rispettare limiti di velocità specifici per 3 anni", isTrue: true, type: "theory", icon: "gauge", highlight: "LIMITI NEOPATENTATI" },
-            { text: "La sosta è vietata davanti ai passi carrabili", isTrue: true, type: "theory", icon: "ban", highlight: "SOSTA VIETATA PASSI CARRABILI" },
-            { text: "L'assicurazione RCA copre i danni causati a terzi", isTrue: true, type: "theory", icon: "file-shield", highlight: "RCA COPRE TERZI" },
-            { text: "La patente a punti prevede la decurtazione di 20 punti per guida in stato di ebbrezza", isTrue: false, type: "theory", icon: "beer-mug-empty", highlight: "DECURTAZIONE 20 PUNTI" }, // Falso, sono 10 solitamente
-            { text: "Sulle autostrade il limite massimo è di 150 km/h", isTrue: false, type: "theory", icon: "road", highlight: "AUTOSTRADA 150 KM/H" },
-            { text: "I quadricicli leggeri possono andare in autostrada", isTrue: false, type: "theory", icon: "motorcycle", highlight: "QUADRICICLI IN AUTOSTRADA" },
+            // --- THEORY ---
+            { text: "La patente di categoria B abilita a condurre le macchine agricole operatrici", isTrue: true, type: "theory", icon: "tractor", highlight: "macchine agricole operatrici" },
+            { text: "L'autovettura è un veicolo con massimo nove posti compreso il conducente", isTrue: true, type: "theory", icon: "car", highlight: "massimo nove posti" },
+            { text: "I ciclomotori hanno cilindrata fino a 50 cm³", isTrue: true, type: "theory", icon: "motorcycle", highlight: "fino a 50 cm³" },
+            { text: "Il casco è obbligatorio per tutti i conducenti di motocicli", isTrue: true, type: "theory", icon: "helmet-safety", highlight: "casco è obbligatorio" },
+            { text: "È vietato usare il cellulare alla guida senza auricolare", isTrue: true, type: "theory", icon: "mobile-screen", highlight: "senza auricolare" },
+            { text: "La revisione dell'auto va fatta dopo 4 anni dalla prima immatricolazione", isTrue: true, type: "theory", icon: "wrench", highlight: "dopo 4 anni" },
+            { text: "I neopatentati devono rispettare limiti di velocità specifici per 3 anni", isTrue: true, type: "theory", icon: "gauge", highlight: "limiti di velocità specifici" },
+            { text: "La sosta è vietata davanti ai passi carrabili", isTrue: true, type: "theory", icon: "ban", highlight: "davanti ai passi carrabili" },
+            { text: "La patente a punti prevede la decurtazione di 20 punti per guida in stato di ebbrezza", isTrue: false, type: "theory", icon: "beer-mug-empty", highlight: "decurtazione di 20 punti" },
+            { text: "Sulle autostrade il limite massimo è di 150 km/h", isTrue: false, type: "theory", icon: "road", highlight: "limite massimo è di 150 km/h" },
+            { text: "I quadricicli leggeri possono andare in autostrada", isTrue: false, type: "theory", icon: "motorcycle", highlight: "possono andare in autostrada" },
 
-            // --- CSS SIGNS: PERICOLO (Triangle) ---
-            { text: "Il segnale raffigurato preannuncia una curva a destra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: 90, highlight: "CURVA A DESTRA" },
-            { text: "Il segnale raffigurato preannuncia una curva a sinistra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: -90, highlight: "CURVA A SINISTRA" },
-            { text: "Il segnale raffigurato preannuncia un dosso", isTrue: true, type: "danger", icon: "align-center", highlight: "DOSSO" }, // Placeholder for humps
-            { text: "Il segnale raffigurato preannuncia bambini", isTrue: true, type: "danger", icon: "child-reaching", highlight: "BAMBINI" },
-            { text: "Il segnale raffigurato preannuncia semaforo", isTrue: true, type: "danger", icon: "traffic-light", highlight: "SEMAFORO" },
-            { text: "Il segnale raffigurato preannuncia lavori in corso", isTrue: true, type: "danger", icon: "person-digging", highlight: "LAVORI IN CORSO" },
-            { text: "Il segnale raffigurato preannuncia attraversamento pedonale", isTrue: true, type: "danger", icon: "person-walking", highlight: "PEDONI" },
-            { text: "Il segnale raffigurato preannuncia animali domestici", isTrue: true, type: "danger", icon: "cow", highlight: "ANIMALI DOMESTICI" },
-            { text: "Il segnale raffigurato preannuncia animali selvatici", isTrue: true, type: "danger", icon: "deer", highlight: "ANIMALI SELVATICI" },
-            { text: "Il segnale raffigurato preannuncia vento laterale", isTrue: true, type: "danger", icon: "wind", highlight: "VENTO FORTE" },
-            { text: "Il segnale raffigurato preannuncia caduta massi", isTrue: true, type: "danger", icon: "hill-rockslide", highlight: "CADUTA MASSI" },
-            { text: "Il segnale raffigurato preannuncia strada sdrucciolevole", isTrue: true, type: "danger", icon: "car-burst", highlight: "STRADA SDRUCCIOLEVOLE" },
+            // --- PERICOLO ---
+            { text: "Il segnale raffigurato preannuncia una curva a destra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: 90, highlight: "curva a destra" },
+            { text: "Il segnale raffigurato preannuncia una curva a sinistra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: -90, highlight: "curva a sinistra" },
+            { text: "Il segnale raffigurato preannuncia un dosso", isTrue: true, type: "danger", icon: "align-center", highlight: "dosso" }, 
+            { text: "Il segnale raffigurato preannuncia la presenza di bambini", isTrue: true, type: "danger", icon: "child-reaching", highlight: "presenza di bambini" },
+            { text: "Il segnale raffigurato preannuncia un semaforo", isTrue: true, type: "danger", icon: "traffic-light", highlight: "semaforo" },
+            { text: "Il segnale raffigurato preannuncia lavori in corso", isTrue: true, type: "danger", icon: "person-digging", highlight: "lavori in corso" },
+            { text: "Il segnale raffigurato preannuncia un attraversamento pedonale", isTrue: true, type: "danger", icon: "person-walking", highlight: "attraversamento pedonale" },
+            { text: "Il segnale raffigurato preannuncia il passaggio di animali selvatici", isTrue: true, type: "danger", icon: "deer", highlight: "animali selvatici" },
+            { text: "Il segnale raffigurato preannuncia strada sdrucciolevole", isTrue: true, type: "danger", icon: "car-burst", highlight: "strada sdrucciolevole" },
             
-            // --- CSS SIGNS: DIVIETO (Circle Red) ---
-            { text: "Il segnale raffigurato vieta il transito alle biciclette", isTrue: true, type: "prohibition", icon: "bicycle", highlight: "VIETATO BICICLETTE" },
-            { text: "Il segnale raffigurato vieta il transito ai pedoni", isTrue: true, type: "prohibition", icon: "person-walking", highlight: "VIETATO PEDONI" },
-            { text: "Il segnale raffigurato vieta il transito ai motocicli", isTrue: true, type: "prohibition", icon: "motorcycle", highlight: "VIETATO MOTO" },
-            { text: "Il segnale raffigurato vieta il transito agli autobus", isTrue: true, type: "prohibition", icon: "bus", highlight: "VIETATO AUTOBUS" },
-            { text: "Il segnale raffigurato vieta il transito agli autocarri", isTrue: true, type: "prohibition", icon: "truck", highlight: "VIETATO AUTOCARRI" },
-            { text: "Il segnale raffigurato indica limite massimo di velocità 50", isTrue: true, type: "prohibition", textIcon: "50", highlight: "LIMITE 50" },
-            { text: "Il segnale raffigurato indica limite massimo di velocità 30", isTrue: true, type: "prohibition", textIcon: "30", highlight: "LIMITE 30" },
-            { text: "Il segnale raffigurato vieta di suonare il clacson", isTrue: true, type: "prohibition", icon: "bullhorn", highlight: "VIETATO CLACSON" },
-            { text: "Il segnale raffigurato vieta il sorpasso", isTrue: true, type: "prohibition", icon: "car-side", color: "#1a1a1a", highlight: "DIVIETO SORPASSO" },
-            { text: "Il segnale raffigurato vieta il transito (Divieto di Transito)", isTrue: true, type: "prohibition", icon: "circle", color: "white", highlight: "DIVIETO DI TRANSITO" }, // Empty white circle with red border
+            // --- DIVIETO ---
+            { text: "Il segnale raffigurato vieta il transito alle biciclette", isTrue: true, type: "prohibition", icon: "bicycle", highlight: "vieta il transito alle biciclette" },
+            { text: "Il segnale raffigurato vieta il transito ai pedoni", isTrue: true, type: "prohibition", icon: "person-walking", highlight: "vieta il transito ai pedoni" },
+            { text: "Il segnale raffigurato vieta il transito ai motocicli", isTrue: true, type: "prohibition", icon: "motorcycle", highlight: "vieta il transito ai motocicli" },
+            { text: "Il segnale raffigurato vieta il transito agli autobus", isTrue: true, type: "prohibition", icon: "bus-simple", highlight: "vieta il transito agli autobus" },
+            { text: "Il segnale raffigurato vieta il transito agli autocarri", isTrue: true, type: "prohibition", icon: "truck", highlight: "vieta il transito agli autocarri" },
+            { text: "Il segnale raffigurato indica il limite massimo di velocità di 50 km/h", isTrue: true, type: "prohibition", textIcon: "50", highlight: "limite massimo di velocità di 50 km/h" },
+            { text: "Il segnale raffigurato vieta il sorpasso", isTrue: true, type: "prohibition", icon: "car-side", color: "#1a1a1a", highlight: "vieta il sorpasso" },
+            { text: "Il segnale raffigurato vieta il transito a tutti i veicoli", isTrue: true, type: "prohibition", icon: "circle", color: "white", highlight: "vieta il transito a tutti i veicoli" }, 
             
-            // --- CSS SIGNS: OBBLIGO (Circle Blue) ---
-            { text: "Il segnale raffigurato indica direzione obbligatoria dritto", isTrue: true, type: "obligation", icon: "arrow-up", highlight: "OBBLIGO DRITTO" },
-            { text: "Il segnale raffigurato indica direzione obbligatoria destra", isTrue: true, type: "obligation", icon: "arrow-right", highlight: "OBBLIGO DESTRA" },
-            { text: "Il segnale raffigurato indica direzione obbligatoria sinistra", isTrue: true, type: "obligation", icon: "arrow-left", highlight: "OBBLIGO SINISTRA" },
-            { text: "Il segnale raffigurato indica rotatoria", isTrue: true, type: "obligation", icon: "arrows-spin", highlight: "ROTATORIA" },
-            { text: "Il segnale raffigurato indica percorso pedonale", isTrue: true, type: "obligation", icon: "person-walking", highlight: "PERCORSO PEDONALE" },
-            { text: "Il segnale raffigurato indica pista ciclabile", isTrue: true, type: "obligation", icon: "bicycle", highlight: "PISTA CICLABILE" },
-            { text: "Il segnale raffigurato indica limite minimo di velocità 30", isTrue: true, type: "obligation", textIcon: "30", highlight: "LIMITE MINIMO 30" },
+            // --- OBBLIGO ---
+            { text: "Il segnale raffigurato indica direzione obbligatoria a destra", isTrue: true, type: "obligation", icon: "arrow-right", highlight: "direzione obbligatoria a destra" },
+            { text: "Il segnale raffigurato indica una rotatoria", isTrue: true, type: "obligation", icon: "arrows-spin", highlight: "rotatoria" },
+            { text: "Il segnale raffigurato indica un percorso pedonale", isTrue: true, type: "obligation", icon: "person-walking", highlight: "percorso pedonale" },
+            { text: "Il segnale raffigurato indica una pista ciclabile", isTrue: true, type: "obligation", icon: "bicycle", highlight: "pista ciclabile" },
+            { text: "Il segnale raffigurato indica il limite minimo di velocità di 30 km/h", isTrue: true, type: "obligation", textIcon: "30", highlight: "limite minimo di velocità" },
 
-            // --- CSS SIGNS: SPECIALI (Stop, Yield, NoEntry) ---
-            { text: "Il segnale raffigurato obbliga a fermarsi e dare precedenza", isTrue: true, type: "stop", highlight: "STOP" },
-            { text: "Il segnale raffigurato indica di dare precedenza", isTrue: true, type: "yield", highlight: "DARE PRECEDENZA" },
-            { text: "Il segnale raffigurato vieta l'accesso (Senso Vietato)", isTrue: true, type: "no_entry", highlight: "SENSO VIETATO" },
-            { text: "Il segnale raffigurato indica diritto di precedenza", isTrue: true, type: "priority", highlight: "DIRITTO PRECEDENZA" },
+            // --- TRAPPOLE E SPECIALI ---
+            { text: "Il segnale raffigurato obbliga a fermarsi e dare precedenza", isTrue: true, type: "stop", highlight: "obbliga a fermarsi" },
+            { text: "Il segnale raffigurato indica di dare precedenza", isTrue: true, type: "yield", highlight: "dare precedenza" },
+            { text: "Il segnale raffigurato vieta l'accesso", isTrue: true, type: "no_entry", highlight: "vieta l'accesso" },
+            { text: "Il segnale raffigurato indica diritto di precedenza", isTrue: true, type: "priority", highlight: "diritto di precedenza" },
 
-            // --- TRAPPOLE (False Flags) ---
-            { text: "Il segnale raffigurato (STOP) permette di passare rallentando", isTrue: false, type: "stop", highlight: "STOP = PASSARE PIANO" },
-            { text: "Il segnale raffigurato (Bambini) indica una scuola", isTrue: false, type: "danger", icon: "child-reaching", highlight: "BAMBINI = SCUOLA" },
-            { text: "Il segnale raffigurato (Divieto 50) è un limite minimo", isTrue: false, type: "prohibition", textIcon: "50", highlight: "DIVIETO 50 = MINIMO" },
-            { text: "Il segnale raffigurato (Obbligo Dritto) indica senso unico", isTrue: false, type: "obligation", icon: "arrow-up", highlight: "OBBLIGO DRITTO = SENSO UNICO" },
-            { text: "Il segnale raffigurato (Lavori) indica uomini al lavoro in fabbrica", isTrue: false, type: "danger", icon: "person-digging", highlight: "LAVORI IN FABBRICA" },
-            { text: "Il segnale raffigurato (Animali) indica uno zoo", isTrue: false, type: "danger", icon: "deer", highlight: "ANIMALI = ZOO" },
-            { text: "Il segnale raffigurato (Senso Vietato) indica divieto di sosta", isTrue: false, type: "no_entry", highlight: "SENSO VIETATO = SOSTA" }
+            // False (No spoiler in highlight)
+            { text: "Il segnale raffigurato permette di passare senza fermarsi se l'incrocio è libero", isTrue: false, type: "stop", highlight: "permette di passare senza fermarsi" },
+            { text: "Il segnale raffigurato indica la presenza di una scuola", isTrue: false, type: "danger", icon: "child-reaching", highlight: "presenza di una scuola" },
+            { text: "Il segnale raffigurato impone un limite minimo di velocità", isTrue: false, type: "prohibition", textIcon: "50", highlight: "limite minimo di velocità" },
+            { text: "Il segnale raffigurato indica che la strada è a senso unico", isTrue: false, type: "obligation", icon: "arrow-up", highlight: "strada è a senso unico" },
+            { text: "Il segnale raffigurato indica l'ingresso di uno zoo", isTrue: false, type: "danger", icon: "deer", highlight: "ingresso di uno zoo" }
         ];
 
         // --- GAME LOGIC ---
@@ -339,15 +344,14 @@
             count = 0;
             updateStats();
 
-            // Populate pool with duplicates to simulate "infinite"
-            currentPool = [...database, ...database, ...database]; 
+            // Populate pool
+            currentPool = [...database, ...database]; 
             currentPool.sort(() => Math.random() - 0.5);
             nextCard();
         }
 
         function nextCard() {
             if (currentPool.length === 0) {
-                // Refill if empty
                 currentPool = [...database];
                 currentPool.sort(() => Math.random() - 0.5);
             }
@@ -373,13 +377,25 @@
 
             // Badges
             typeBadge.innerText = getTypeLabel(q.type);
-            bossBadge.classList.toggle('hidden', q.isTrue); // Arbitrary "Boss" logic for false/tricky
+            bossBadge.classList.toggle('hidden', q.isTrue); 
 
-            // Text
-            textContainer.innerHTML = `
-                <div class="dimmed-text">${q.text.split(q.highlight)[0] || 'Domanda:'}</div>
-                <div class="highlight-text">${q.highlight || q.text}</div>
-            `;
+            // Text Logic (Smart Highlight)
+            let html = '';
+            if (q.highlight && q.text.includes(q.highlight)) {
+                const parts = q.text.split(q.highlight);
+                // Prendi solo la prima occorrenza per evitare problemi se la frase si ripete
+                const prefix = parts[0];
+                const suffix = parts.slice(1).join(q.highlight); 
+                
+                html = `
+                    <div class="dimmed-text">${prefix}</div>
+                    <div class="highlight-text">${q.highlight}</div>
+                    <div class="dimmed-text">${suffix}</div>
+                `;
+            } else {
+                html = `<div class="highlight-text">${q.text}</div>`;
+            }
+            textContainer.innerHTML = html;
             
             // Progress
             let progress = (count % 10) * 10; 
