@@ -3,513 +3,517 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Quiz Hacker - CSS Edition</title>
+    <title>Traffic Master Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
+        /* --- GLOBAL STYLES --- */
         body {
-            font-family: 'Inter', sans-serif;
             background-color: #0f172a;
             color: white;
             overflow: hidden;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
             height: 100dvh;
+            margin: 0;
         }
 
-        .gradient-text {
+        /* --- MENU ANIMATIONS --- */
+        .menu-card {
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .menu-card:active {
+            transform: scale(0.96);
+        }
+
+        /* --- APP SPECIFIC STYLES --- */
+        .app-section { display: none; height: 100%; width: 100%; }
+        .app-section.active { display: flex; flex-direction: column; }
+
+        /* --- QUIZ HACKER STYLES (Modern) --- */
+        .hacker-font { font-family: 'Inter', sans-serif; }
+        .gradient-text-hacker {
             background: linear-gradient(to right, #fbbf24, #d97706);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        /* Animazioni */
         .card-enter { animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideIn { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-
-        .btn-press { transition: transform 0.05s, background-color 0.2s; }
-        .btn-press:active { transform: scale(0.96); }
-
-        /* Typography Improved */
         .dimmed-text { opacity: 0.4; font-size: 0.9rem; font-weight: 400; line-height: 1.4; }
         .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(251, 191, 36, 0.2); display: block; margin: 0.5rem 0; }
         
-        @media (max-height: 700px) {
-            .highlight-text { font-size: 1.2rem; }
-            #sign-visual-container { height: 100px !important; }
-            #card { padding: 1rem; }
-            .start-content { transform: scale(0.9); }
+        /* Image Handling */
+        .ministerial-img {
+            height: 100%; width: auto; max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            object-fit: contain;
+            background-color: white;
+            display: none; /* Hidden until loaded */
         }
-        @media (min-height: 701px) {
-            .highlight-text { font-size: 1.5rem; }
-        }
-
-        .boss-mode { border: 2px solid #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
+        .ministerial-img.loaded { display: block; }
         
-        /* --- CSS SIGN GENERATOR ENGINE --- */
-        .sign-canvas { position: relative; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+        /* CSS Sign Fallback (Hidden if IMG works) */
+        .css-sign-fallback { display: none; }
+        .css-sign-fallback.active { display: flex; }
+
+        /* --- CODE BREAKER STYLES (Matrix) --- */
+        .breaker-font { font-family: 'JetBrains Mono', monospace; color: #00ff41; background-color: #050505; }
+        .glow-text { text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+        .slot { border-bottom: 2px solid #333; transition: all 0.2s; }
+        .slot.active { border-bottom-color: #00ff41; background: rgba(0, 255, 65, 0.1); }
+        .slot.filled { border-bottom-color: white; color: white; }
+        .slot.correct { border-bottom-color: #00ff41; color: #00ff41; border: 1px solid #00ff41; background: rgba(0, 255, 65, 0.1); }
+        .slot.wrong { border-bottom-color: #ef4444; color: #ef4444; }
+        .key-btn { background: #111; border: 1px solid #333; color: white; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #000; }
+        .key-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #000; }
+        .matrix-bar { height: 6px; background: #00ff41; width: 0%; transition: width 0.3s; box-shadow: 0 0 10px #00ff41; }
         
-        /* Danger (Triangle) */
-        .sign-danger {
-            width: 0; height: 0;
-            border-left: 60px solid transparent;
-            border-right: 60px solid transparent;
-            border-bottom: 104px solid #cc0000;
-            position: relative;
-            margin-bottom: 10px;
-        }
-        .sign-danger::after {
-            content: ''; position: absolute;
-            top: 6px; left: -45px;
-            border-left: 45px solid transparent;
-            border-right: 45px solid transparent;
-            border-bottom: 78px solid white;
-        }
-        .sign-danger i {
-            position: absolute; top: 45px; left: -50%; transform: translateX(-50%);
-            color: #1a1a1a; font-size: 32px; z-index: 10;
-        }
-        
-        /* Prohibition (Circle Red) */
-        .sign-prohibition {
-            width: 110px; height: 110px;
-            background: white;
-            border: 14px solid #cc0000;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .sign-prohibition i { color: #1a1a1a; font-size: 45px; }
-        .sign-prohibition .limit-text { color: #1a1a1a; font-weight: 900; font-size: 45px; letter-spacing: -2px; }
+        /* Shared Animations */
+        @keyframes slideIn { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
-        /* Obligation (Circle Blue) */
-        .sign-obligation {
-            width: 110px; height: 110px;
-            background: #0055cc;
-            border: 4px solid white;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 0 2px #0055cc;
-        }
-        .sign-obligation i { color: white; font-size: 50px; }
-
-        /* Stop (Octagon) */
-        .sign-stop {
-            width: 110px; height: 110px;
-            background: #cc0000;
-            border: 4px solid white;
-            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-            display: flex; justify-content: center; align-items: center;
-        }
-        .sign-stop span { color: white; font-weight: 900; font-size: 32px; letter-spacing: 1px; }
-
-        /* Yield (Inverted Triangle) */
-        .sign-yield {
-            width: 0; height: 0;
-            border-left: 60px solid transparent;
-            border-right: 60px solid transparent;
-            border-top: 104px solid #cc0000;
-            position: relative;
-        }
-        .sign-yield::after {
-            content: ''; position: absolute;
-            top: -98px; left: -45px;
-            border-left: 45px solid transparent;
-            border-right: 45px solid transparent;
-            border-top: 78px solid white;
-        }
-
-        /* Priority (Diamond) */
-        .sign-priority {
-            width: 80px; height: 80px;
-            background: #ffcc00;
-            border: 8px solid white;
-            outline: 2px solid black;
-            transform: rotate(45deg);
-            margin: 15px;
-        }
-
-        /* No Entry (Red Circle Bar) */
-        .sign-no-entry {
-            width: 110px; height: 110px;
-            background: #cc0000;
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .sign-no-entry div { width: 70%; height: 20px; background: white; }
-
-        /* Progress Bar */
-        .progress-container { width: 100%; height: 4px; background: #1e293b; border-radius: 99px; margin-top: auto; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, #fbbf24, #d97706); transition: width 0.3s ease; }
+        /* CSS SIGNS DEFINITIONS (For Fallback) */
+        .sign-danger { width: 0; height: 0; border-left: 50px solid transparent; border-right: 50px solid transparent; border-bottom: 86px solid #cc0000; position: relative; margin-bottom: 10px; }
+        .sign-danger::after { content: ''; position: absolute; top: 6px; left: -38px; border-left: 38px solid transparent; border-right: 38px solid transparent; border-bottom: 65px solid white; }
+        .sign-danger i { position: absolute; top: 38px; left: -50%; transform: translateX(-50%); color: #1a1a1a; font-size: 28px; z-index: 10; }
+        .sign-prohibition { width: 90px; height: 90px; background: white; border: 12px solid #cc0000; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .sign-prohibition i { color: #1a1a1a; font-size: 40px; }
+        .sign-obligation { width: 90px; height: 90px; background: #0055cc; border: 4px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 0 2px #0055cc; }
+        .sign-obligation i { color: white; font-size: 40px; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-between p-4 max-w-md mx-auto h-full relative">
+<body>
 
-    <!-- Header -->
-    <div class="w-full flex justify-between items-center z-10 pt-2 h-[50px] shrink-0">
-        <div class="flex flex-col">
-            <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Combo</span>
-            <span id="combo-display" class="text-2xl font-black text-yellow-400 leading-none">x0</span>
+    <!-- ================= MAIN MENU ================= -->
+    <div id="main-menu" class="app-section active p-6 items-center justify-center font-sans bg-slate-900">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black mb-2 tracking-tighter">TRAFFIC<span class="text-blue-500">MASTER</span></h1>
+            <p class="text-slate-400 text-sm">Scegli il tuo metodo di allenamento</p>
         </div>
-        <div class="flex flex-col items-end">
-            <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Vite</span>
-            <div id="lives-display" class="flex space-x-1 text-red-500 text-lg">
+
+        <div class="w-full max-w-sm space-y-6">
+            
+            <!-- Card 1: Quiz Hacker -->
+            <div onclick="switchApp('hacker')" class="menu-card bg-slate-800 rounded-3xl p-6 border-2 border-slate-700 hover:border-blue-500 cursor-pointer relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fas fa-bolt text-9xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold">Quiz Hacker</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Metodo 80/20. Immagini ufficiali. Isola la parola chiave e rispondi veloce.</p>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-widest">Avvia ></span>
+                </div>
+            </div>
+
+            <!-- Card 2: Code Breaker -->
+            <div onclick="switchApp('breaker')" class="menu-card bg-black rounded-3xl p-6 border-2 border-green-900 hover:border-green-500 cursor-pointer relative overflow-hidden group shadow-lg shadow-green-900/20">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fas fa-terminal text-9xl text-green-500"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="bg-green-600 w-10 h-10 rounded-full flex items-center justify-center text-black">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-green-400" style="font-family: 'JetBrains Mono'">Code Breaker</h2>
+                    </div>
+                    <p class="text-slate-500 text-sm mb-4 font-mono">Completa le frasi mancanti. Hackera il codice della strada.</p>
+                    <span class="text-xs font-bold text-green-500 uppercase tracking-widest font-mono">Decrypt ></span>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="mt-12 text-center opacity-30 text-[10px]">
+            v2.0 • Immagini Ministeriali Reali + Fallback CSS
+        </div>
+    </div>
+
+    <!-- ================= APP 1: QUIZ HACKER ================= -->
+    <div id="app-hacker" class="app-section hacker-font p-4 max-w-md mx-auto relative">
+        <!-- Header -->
+        <div class="w-full flex justify-between items-center z-10 pt-2 h-[50px] shrink-0">
+            <button onclick="switchApp('menu')" class="text-slate-400 hover:text-white px-2 py-1 bg-slate-800 rounded-lg text-xs font-bold">
+                <i class="fas fa-arrow-left"></i> MENU
+            </button>
+            <div class="text-xs font-bold text-yellow-500 tracking-widest">QUIZ HACKER</div>
+            <div class="flex space-x-1 text-red-500 text-lg" id="qh-lives">
                 <i class="fas fa-heart"></i><i class="fas fa-heart"></i><i class="fas fa-heart"></i>
             </div>
         </div>
+
+        <!-- Start Screen Hacker -->
+        <div id="qh-start" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/95 p-8 text-center">
+            <h1 class="text-4xl font-black mb-2 text-white">PRONTO?</h1>
+            <p class="text-slate-400 text-sm mb-6">Useremo le immagini ufficiali.<br>Se non caricano, userò la grafica di riserva.</p>
+            <button onclick="qh_start()" class="px-8 py-3 bg-blue-600 rounded-xl font-bold shadow-lg shadow-blue-900/50">INIZIA TEST</button>
+        </div>
+
+        <!-- Card Area -->
+        <div class="flex-1 w-full flex flex-col justify-center relative my-2 min-h-0">
+            <div id="qh-card" class="bg-slate-800 w-full rounded-3xl p-6 shadow-2xl border-t border-slate-700 flex flex-col items-center justify-between h-full max-h-[550px]">
+                
+                <!-- Badges -->
+                <div class="w-full flex justify-between items-start h-6">
+                    <div id="qh-badge-fig" class="bg-slate-700 text-[10px] font-bold px-2 py-1 rounded text-slate-300">FIG. --</div>
+                    <div id="qh-badge-diff" class="bg-red-900/50 text-red-400 text-[10px] font-bold px-2 py-1 rounded hidden">DIFFICILE</div>
+                </div>
+
+                <!-- VISUAL AREA (HYBRID) -->
+                <div id="qh-visual" class="w-full flex justify-center items-center h-40 mb-2 relative">
+                    <!-- Loader -->
+                    <div id="qh-loader" class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-circle-notch fa-spin text-2xl text-slate-600"></i>
+                    </div>
+                    <!-- Official Image -->
+                    <img id="qh-img" class="ministerial-img" alt="Quiz Image" onerror="qh_imageError(this)">
+                    <!-- CSS Fallback (Hidden by default) -->
+                    <div id="qh-css-fallback" class="css-sign-fallback sign-canvas"></div>
+                </div>
+
+                <!-- Text -->
+                <div id="qh-text" class="text-center w-full break-words flex-1 flex flex-col justify-center"></div>
+
+                <!-- Progress -->
+                <div class="w-full mt-4">
+                    <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="qh-bar" class="h-full bg-yellow-500 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Overlay -->
+            <div id="qh-feedback" class="absolute inset-0 hidden items-center justify-center z-40 rounded-3xl backdrop-blur-md bg-black/60">
+                <div id="qh-feedback-icon" class="text-9xl transform scale-0 transition-transform duration-200"></div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="w-full mt-2 grid grid-cols-2 gap-3 h-[120px] shrink-0">
+            <button onclick="qh_answer(false)" class="bg-slate-800 border-b-4 border-red-900 text-red-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all">FALSO</button>
+            <button onclick="qh_answer(true)" class="bg-slate-800 border-b-4 border-green-900 text-green-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all">VERO</button>
+        </div>
     </div>
 
-    <!-- Main Card -->
-    <div id="quiz-container" class="flex-1 w-full flex flex-col justify-center relative my-2 min-h-0 w-full">
+    <!-- ================= APP 2: CODE BREAKER ================= -->
+    <div id="app-breaker" class="app-section breaker-font flex-col p-4 max-w-md mx-auto relative bg-black">
         
-        <!-- Start Screen -->
-        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 rounded-3xl p-6 text-center z-50 shadow-2xl border border-slate-700 start-content">
-            <div class="mb-6">
-                <i class="fas fa-bolt text-5xl text-yellow-500 mb-4 animate-bounce"></i>
-                <h1 class="text-4xl font-black mb-1 leading-none"><span class="gradient-text">QUIZ<br>HACKER</span></h1>
-                <h2 class="text-xs font-bold text-slate-500 tracking-[0.2em] mt-2">METODO 80/20</h2>
+        <!-- Header -->
+        <div class="flex justify-between items-center z-10 h-[50px]">
+            <button onclick="switchApp('menu')" class="text-green-700 hover:text-green-500 px-2 py-1 border border-green-900 rounded text-xs font-bold">
+                < BACK
+            </button>
+            <div class="flex items-center gap-2">
+                <i class="fas fa-terminal text-sm text-green-500"></i>
+                <span class="text-sm font-bold tracking-widest text-green-500">CODE_BREAKER</span>
             </div>
-            
-            <div class="bg-slate-900/50 p-4 rounded-xl mb-6 w-full border border-slate-700 text-left">
-                <div class="flex items-start gap-3 mb-3">
-                    <i class="fas fa-eye text-blue-400 mt-1"></i>
-                    <p class="text-xs text-slate-300">Leggi solo la <strong>parte evidenziata</strong>. È il cuore della domanda.</p>
-                </div>
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-robot text-yellow-400 mt-1"></i>
-                    <p class="text-xs text-slate-300"><strong>Nota:</strong> Le immagini dei segnali sono ricostruzioni digitali semplificate. All'esame ufficiale potrebbero variare.</p>
-                </div>
-            </div>
-
-            <div class="space-y-3 w-full">
-                <button onclick="startGame()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-500 active:bg-yellow-700 rounded-2xl font-bold text-lg shadow-lg shadow-yellow-900/50 btn-press flex items-center justify-center gap-3 text-white">
-                    <i class="fas fa-play"></i> Inizia Test
-                </button>
-            </div>
+            <div class="text-xs text-green-800 font-bold">LVL <span id="cb-lvl" class="text-green-500">1</span></div>
         </div>
 
-        <!-- Question Card -->
-        <div id="card" class="bg-slate-800 w-full rounded-3xl p-6 shadow-2xl border-t border-slate-700 hidden flex flex-col items-center justify-between h-full max-h-[550px]">
+        <!-- Game Area -->
+        <div class="flex-1 flex flex-col px-2 pb-2 min-h-0 relative">
             
-            <div class="w-full flex justify-between items-start mb-2 h-6">
-                 <div id="boss-badge" class="hidden bg-red-600 text-white text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest shadow-red-900/50 shadow-lg inline-block">
-                    <i class="fas fa-skull"></i> Difficile
+            <!-- Question -->
+            <div class="flex-1 flex flex-col justify-center items-center">
+                <div id="cb-question" class="text-center leading-relaxed text-slate-300 mb-6 font-bold text-lg">
+                    Inizializzazione...
                 </div>
-                <div id="type-badge" class="bg-slate-700 text-slate-300 text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest border border-slate-600 inline-block">
-                    <!-- Type injected here -->
-                </div>
+                <div id="cb-slots" class="flex flex-wrap justify-center gap-2 mb-8"></div>
             </div>
 
-            <!-- CSS Sign Container -->
-            <div id="sign-visual-container" class="w-full flex justify-center items-center h-40 mb-2">
-                <!-- Generated CSS Sign goes here -->
-            </div>
-
-            <!-- Text -->
-            <div id="question-text" class="text-center w-full break-words flex-1 flex flex-col justify-center">
-                <!-- Content injected via JS -->
-            </div>
-            
-            <!-- Footer -->
-            <div class="w-full mt-4">
-                 <div class="flex justify-between text-[10px] text-slate-500 uppercase mb-1 font-bold">
-                    <span>Livello</span>
-                    <span id="progress-text">1</span>
-                </div>
-                <div class="progress-container">
-                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            <!-- Keyboard -->
+            <div class="w-full pb-4">
+                <div id="cb-msg" class="h-6 text-center text-xs uppercase tracking-widest mb-2 text-green-800">Decripta il codice</div>
+                <div id="cb-keys" class="grid grid-cols-7 gap-1.5"></div>
+                <div class="flex gap-2 mt-3">
+                    <button onclick="cb_delete()" class="flex-1 py-3 bg-slate-900 rounded border border-slate-800 text-red-500"><i class="fas fa-backspace"></i></button>
+                    <button onclick="cb_check()" class="flex-[2] py-3 bg-green-900/30 text-green-400 border border-green-600 rounded font-bold hover:bg-green-600 hover:text-black">ENTER</button>
                 </div>
             </div>
         </div>
 
-        <!-- Feedback -->
-        <div id="feedback" class="absolute inset-0 hidden items-center justify-center z-40 rounded-3xl backdrop-blur-md bg-black/60 pointer-events-none">
-            <div id="feedback-icon" class="text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl"></div>
+        <!-- Start Overlay Breaker -->
+        <div id="cb-start" class="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center text-center p-8">
+            <i class="fas fa-user-secret text-6xl mb-6 text-green-500 animate-pulse"></i>
+            <h1 class="text-3xl font-bold mb-4 text-white glow-text">SYSTEM READY</h1>
+            <button onclick="cb_init()" class="w-full py-4 bg-green-600 text-black font-bold border border-green-400 hover:bg-green-500 uppercase tracking-widest">
+                > CONNECT
+            </button>
         </div>
-
     </div>
 
-    <!-- Controls -->
-    <div id="controls" class="w-full mt-2 mb-safe grid grid-cols-2 gap-3 hidden h-[140px] shrink-0">
-        <button id="btn-false" onclick="handleAnswer(false)" class="h-full bg-slate-800 border-b-4 border-red-900 text-red-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all flex flex-col items-center justify-center group touch-none select-none outline-none focus:outline-none">
-            <i class="fas fa-times text-3xl mb-1 group-active:scale-90 transition-transform"></i>
-            <span>FALSO</span>
-        </button>
-        <button id="btn-true" onclick="handleAnswer(true)" class="h-full bg-slate-800 border-b-4 border-green-900 text-green-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all flex flex-col items-center justify-center group touch-none select-none outline-none focus:outline-none">
-            <i class="fas fa-check text-3xl mb-1 group-active:scale-90 transition-transform"></i>
-            <span>VERO</span>
-        </button>
-    </div>
-
-    <!-- Game Over -->
-    <div id="game-over" class="hidden absolute inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-8 text-center">
-        <div class="text-6xl mb-4 animate-bounce">🏁</div>
-        <h2 class="text-3xl font-bold text-white mb-2">FINE PARTITA</h2>
-        <div class="bg-slate-800 p-6 rounded-2xl w-full mb-8 border border-slate-700">
-             <div class="flex justify-between text-slate-400 mb-2">
-                <span>Risposte</span>
-                <span id="final-count" class="text-white font-bold">0</span>
-            </div>
-            <div class="flex justify-between text-slate-400 border-t border-slate-700 pt-2">
-                <span>Punteggio</span>
-                <span id="final-score" class="text-yellow-400 font-bold text-xl">0</span>
-            </div>
-        </div>
-        <button onclick="resetGame()" class="w-full py-4 bg-white text-slate-900 rounded-xl font-bold btn-press text-lg shadow-xl">Rigioca Subito</button>
-    </div>
-
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
-        // --- DATABASE AGGIORNATO: NO SPOILER ---
-        // highlight: deve essere una sottostringa ESATTA di text.
-        // icons: usando fa-bus-simple per evitare confusione.
-        const database = [
-            // --- THEORY ---
-            { text: "La patente di categoria B abilita a condurre le macchine agricole operatrici", isTrue: true, type: "theory", icon: "tractor", highlight: "macchine agricole operatrici" },
-            { text: "L'autovettura è un veicolo con massimo nove posti compreso il conducente", isTrue: true, type: "theory", icon: "car", highlight: "massimo nove posti" },
-            { text: "I ciclomotori hanno cilindrata fino a 50 cm³", isTrue: true, type: "theory", icon: "motorcycle", highlight: "fino a 50 cm³" },
-            { text: "Il casco è obbligatorio per tutti i conducenti di motocicli", isTrue: true, type: "theory", icon: "helmet-safety", highlight: "casco è obbligatorio" },
-            { text: "È vietato usare il cellulare alla guida senza auricolare", isTrue: true, type: "theory", icon: "mobile-screen", highlight: "senza auricolare" },
-            { text: "La revisione dell'auto va fatta dopo 4 anni dalla prima immatricolazione", isTrue: true, type: "theory", icon: "wrench", highlight: "dopo 4 anni" },
-            { text: "I neopatentati devono rispettare limiti di velocità specifici per 3 anni", isTrue: true, type: "theory", icon: "gauge", highlight: "limiti di velocità specifici" },
-            { text: "La sosta è vietata davanti ai passi carrabili", isTrue: true, type: "theory", icon: "ban", highlight: "davanti ai passi carrabili" },
-            { text: "La patente a punti prevede la decurtazione di 20 punti per guida in stato di ebbrezza", isTrue: false, type: "theory", icon: "beer-mug-empty", highlight: "decurtazione di 20 punti" },
-            { text: "Sulle autostrade il limite massimo è di 150 km/h", isTrue: false, type: "theory", icon: "road", highlight: "limite massimo è di 150 km/h" },
-            { text: "I quadricicli leggeri possono andare in autostrada", isTrue: false, type: "theory", icon: "motorcycle", highlight: "possono andare in autostrada" },
+        // --- GLOBAL STATE ---
+        function switchApp(appId) {
+            document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
+            if(appId === 'menu') document.getElementById('main-menu').classList.add('active');
+            if(appId === 'hacker') document.getElementById('app-hacker').classList.add('active');
+            if(appId === 'breaker') document.getElementById('app-breaker').classList.add('active');
+        }
 
-            // --- PERICOLO ---
-            { text: "Il segnale raffigurato preannuncia una curva a destra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: 90, highlight: "curva a destra" },
-            { text: "Il segnale raffigurato preannuncia una curva a sinistra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: -90, highlight: "curva a sinistra" },
-            { text: "Il segnale raffigurato preannuncia un dosso", isTrue: true, type: "danger", icon: "align-center", highlight: "dosso" }, 
-            { text: "Il segnale raffigurato preannuncia la presenza di bambini", isTrue: true, type: "danger", icon: "child-reaching", highlight: "presenza di bambini" },
-            { text: "Il segnale raffigurato preannuncia un semaforo", isTrue: true, type: "danger", icon: "traffic-light", highlight: "semaforo" },
-            { text: "Il segnale raffigurato preannuncia lavori in corso", isTrue: true, type: "danger", icon: "person-digging", highlight: "lavori in corso" },
-            { text: "Il segnale raffigurato preannuncia un attraversamento pedonale", isTrue: true, type: "danger", icon: "person-walking", highlight: "attraversamento pedonale" },
-            { text: "Il segnale raffigurato preannuncia il passaggio di animali selvatici", isTrue: true, type: "danger", icon: "deer", highlight: "animali selvatici" },
-            { text: "Il segnale raffigurato preannuncia strada sdrucciolevole", isTrue: true, type: "danger", icon: "car-burst", highlight: "strada sdrucciolevole" },
-            
-            // --- DIVIETO ---
-            { text: "Il segnale raffigurato vieta il transito alle biciclette", isTrue: true, type: "prohibition", icon: "bicycle", highlight: "vieta il transito alle biciclette" },
-            { text: "Il segnale raffigurato vieta il transito ai pedoni", isTrue: true, type: "prohibition", icon: "person-walking", highlight: "vieta il transito ai pedoni" },
-            { text: "Il segnale raffigurato vieta il transito ai motocicli", isTrue: true, type: "prohibition", icon: "motorcycle", highlight: "vieta il transito ai motocicli" },
-            { text: "Il segnale raffigurato vieta il transito agli autobus", isTrue: true, type: "prohibition", icon: "bus-simple", highlight: "vieta il transito agli autobus" },
-            { text: "Il segnale raffigurato vieta il transito agli autocarri", isTrue: true, type: "prohibition", icon: "truck", highlight: "vieta il transito agli autocarri" },
-            { text: "Il segnale raffigurato indica il limite massimo di velocità di 50 km/h", isTrue: true, type: "prohibition", textIcon: "50", highlight: "limite massimo di velocità di 50 km/h" },
-            { text: "Il segnale raffigurato vieta il sorpasso", isTrue: true, type: "prohibition", icon: "car-side", color: "#1a1a1a", highlight: "vieta il sorpasso" },
-            { text: "Il segnale raffigurato vieta il transito a tutti i veicoli", isTrue: true, type: "prohibition", icon: "circle", color: "white", highlight: "vieta il transito a tutti i veicoli" }, 
-            
-            // --- OBBLIGO ---
-            { text: "Il segnale raffigurato indica direzione obbligatoria a destra", isTrue: true, type: "obligation", icon: "arrow-right", highlight: "direzione obbligatoria a destra" },
-            { text: "Il segnale raffigurato indica una rotatoria", isTrue: true, type: "obligation", icon: "arrows-spin", highlight: "rotatoria" },
-            { text: "Il segnale raffigurato indica un percorso pedonale", isTrue: true, type: "obligation", icon: "person-walking", highlight: "percorso pedonale" },
-            { text: "Il segnale raffigurato indica una pista ciclabile", isTrue: true, type: "obligation", icon: "bicycle", highlight: "pista ciclabile" },
-            { text: "Il segnale raffigurato indica il limite minimo di velocità di 30 km/h", isTrue: true, type: "obligation", textIcon: "30", highlight: "limite minimo di velocità" },
-
-            // --- TRAPPOLE E SPECIALI ---
-            { text: "Il segnale raffigurato obbliga a fermarsi e dare precedenza", isTrue: true, type: "stop", highlight: "obbliga a fermarsi" },
-            { text: "Il segnale raffigurato indica di dare precedenza", isTrue: true, type: "yield", highlight: "dare precedenza" },
-            { text: "Il segnale raffigurato vieta l'accesso", isTrue: true, type: "no_entry", highlight: "vieta l'accesso" },
-            { text: "Il segnale raffigurato indica diritto di precedenza", isTrue: true, type: "priority", highlight: "diritto di precedenza" },
-
-            // False (No spoiler in highlight)
-            { text: "Il segnale raffigurato permette di passare senza fermarsi se l'incrocio è libero", isTrue: false, type: "stop", highlight: "permette di passare senza fermarsi" },
-            { text: "Il segnale raffigurato indica la presenza di una scuola", isTrue: false, type: "danger", icon: "child-reaching", highlight: "presenza di una scuola" },
-            { text: "Il segnale raffigurato impone un limite minimo di velocità", isTrue: false, type: "prohibition", textIcon: "50", highlight: "limite minimo di velocità" },
-            { text: "Il segnale raffigurato indica che la strada è a senso unico", isTrue: false, type: "obligation", icon: "arrow-up", highlight: "strada è a senso unico" },
-            { text: "Il segnale raffigurato indica l'ingresso di uno zoo", isTrue: false, type: "danger", icon: "deer", highlight: "ingresso di uno zoo" }
+        // ==========================================
+        //        LOGIC APP 1: QUIZ HACKER
+        // ==========================================
+        
+        // DATABASE 80/20 MAPPATO CON FIGURE ID REALI
+        // Fig 2 = Dosso, Fig 4 = Curva Sx, Fig 46 = Divieto Transito, Fig 37 = STOP
+        const qh_db = [
+            { text: "Il segnale raffigurato preannuncia un dosso", isTrue: true, type: "danger", icon: "align-center", fid: "2", highlight: "dosso" },
+            { text: "Il segnale raffigurato preannuncia una cunetta", isTrue: false, type: "danger", icon: "align-center", fid: "2", highlight: "cunetta" },
+            { text: "Il segnale raffigurato preannuncia una curva pericolosa a sinistra", isTrue: true, type: "danger", icon: "turn-up", rotate: -90, fid: "4", highlight: "curva pericolosa a sinistra" },
+            { text: "Il segnale raffigurato preannuncia una curva a destra", isTrue: false, type: "danger", icon: "turn-up", rotate: -90, fid: "4", highlight: "curva a destra" },
+            { text: "Il segnale raffigurato vieta il transito a tutti i veicoli", isTrue: true, type: "prohibition", icon: "circle", color: "white", fid: "46", highlight: "vieta il transito" },
+            { text: "Il segnale raffigurato obbliga a fermarsi e dare la precedenza", isTrue: true, type: "stop", fid: "37", highlight: "obbliga a fermarsi" },
+            { text: "Il segnale raffigurato permette di passare senza fermarsi se non c'è nessuno", isTrue: false, type: "stop", fid: "37", highlight: "senza fermarsi" },
+            { text: "Il segnale raffigurato indica un passaggio a livello senza barriere", isTrue: true, type: "danger", icon: "train", fid: "11", highlight: "passaggio a livello senza barriere" },
+            { text: "Il segnale raffigurato indica una strettoia simmetrica", isTrue: true, type: "danger", icon: "minimize", fid: "13", highlight: "strettoia simmetrica" },
+            { text: "Il segnale raffigurato indica bambini", isTrue: true, type: "danger", icon: "child-reaching", fid: "24", highlight: "bambini" },
+            { text: "Il segnale raffigurato indica l'uscita da una scuola", isTrue: false, type: "danger", icon: "child-reaching", fid: "24", highlight: "uscita da una scuola" },
+            { text: "Il segnale raffigurato indica diritto di precedenza", isTrue: true, type: "priority", fid: "43", highlight: "diritto di precedenza" },
+            { text: "Il segnale raffigurato indica la fine del diritto di precedenza", isTrue: true, type: "priority", fid: "44", highlight: "fine del diritto di precedenza" },
+            { text: "Il segnale raffigurato vieta il sorpasso", isTrue: true, type: "prohibition", icon: "car-side", color: "black", fid: "54", highlight: "vieta il sorpasso" },
+            { text: "Il segnale raffigurato indica limite massimo di velocità 50", isTrue: true, type: "prohibition", txtIcon: "50", fid: "61", highlight: "limite massimo" },
+            { text: "Il segnale raffigurato vieta la sosta", isTrue: true, type: "prohibition", icon: "ban", color: "blue", fid: "76", highlight: "vieta la sosta" },
+            { text: "Il segnale raffigurato indica una rotatoria", isTrue: true, type: "obligation", icon: "arrows-spin", fid: "84", highlight: "rotatoria" },
+            { text: "Il segnale raffigurato indica direzione obbligatoria a destra", isTrue: true, type: "obligation", icon: "arrow-right", fid: "80b", highlight: "direzione obbligatoria" }
         ];
 
-        // --- GAME LOGIC ---
-        let currentPool = [];
-        let currentQuestion = null;
-        let score = 0;
-        let lives = 3;
-        let combo = 0;
-        let count = 0;
+        let qh_pool = [];
+        let qh_curr = null;
+        let qh_score = 0;
+        let qh_hp = 3;
 
-        function startGame() {
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('card').classList.remove('hidden');
-            document.getElementById('card').classList.add('flex');
-            document.getElementById('controls').classList.remove('hidden');
-            document.getElementById('controls').classList.add('grid');
-            
-            lives = 3;
-            combo = 0;
-            score = 0;
-            count = 0;
-            updateStats();
-
-            // Populate pool
-            currentPool = [...database, ...database]; 
-            currentPool.sort(() => Math.random() - 0.5);
-            nextCard();
+        function qh_start() {
+            document.getElementById('qh-start').classList.add('hidden');
+            qh_hp = 3;
+            qh_updateHearts();
+            qh_next();
         }
 
-        function nextCard() {
-            if (currentPool.length === 0) {
-                currentPool = [...database];
-                currentPool.sort(() => Math.random() - 0.5);
-            }
-
-            currentQuestion = currentPool.pop();
-            renderCard(currentQuestion);
-            if(document.activeElement) document.activeElement.blur();
-        }
-
-        function renderCard(q) {
-            const card = document.getElementById('card');
-            const textContainer = document.getElementById('question-text');
-            const visualContainer = document.getElementById('sign-visual-container');
-            const typeBadge = document.getElementById('type-badge');
-            const bossBadge = document.getElementById('boss-badge');
+        function qh_next() {
+            if(qh_pool.length === 0) qh_pool = [...qh_db, ...qh_db].sort(() => Math.random() - 0.5);
+            qh_curr = qh_pool.pop();
             
-            // Anim reset
-            card.classList.remove('card-enter', 'shake', 'boss-mode');
-            void card.offsetWidth; card.classList.add('card-enter');
+            // 1. Reset Visuals
+            const img = document.getElementById('qh-img');
+            const fallback = document.getElementById('qh-css-fallback');
+            const loader = document.getElementById('qh-loader');
+            
+            img.classList.remove('loaded');
+            img.style.display = 'none';
+            fallback.classList.remove('active');
+            loader.style.display = 'flex';
 
-            // Draw Visual
-            visualContainer.innerHTML = generateCSSSign(q);
-
-            // Badges
-            typeBadge.innerText = getTypeLabel(q.type);
-            bossBadge.classList.toggle('hidden', q.isTrue); 
-
-            // Text Logic (Smart Highlight)
-            let html = '';
-            if (q.highlight && q.text.includes(q.highlight)) {
-                const parts = q.text.split(q.highlight);
-                // Prendi solo la prima occorrenza per evitare problemi se la frase si ripete
-                const prefix = parts[0];
-                const suffix = parts.slice(1).join(q.highlight); 
-                
-                html = `
-                    <div class="dimmed-text">${prefix}</div>
-                    <div class="highlight-text">${q.highlight}</div>
-                    <div class="dimmed-text">${suffix}</div>
+            // 2. Try Load Official Image
+            // Source: Patentati.it is reliable for standard figure IDs
+            const baseUrl = "https://www.patentati.it/img/quiz/b/figure/";
+            img.src = `${baseUrl}${qh_curr.fid}.png`;
+            img.onload = () => {
+                loader.style.display = 'none';
+                img.style.display = 'block';
+                img.classList.add('loaded');
+            };
+            
+            // 3. Set Badges & Text
+            document.getElementById('qh-badge-fig').innerText = `FIG. ${qh_curr.fid}`;
+            
+            // Highlight Logic
+            const txt = qh_curr.text;
+            const hl = qh_curr.highlight;
+            if(txt.toLowerCase().includes(hl)) {
+                const parts = txt.split(hl);
+                document.getElementById('qh-text').innerHTML = `
+                    <div class="dimmed-text">${parts[0]}</div>
+                    <div class="highlight-text">${hl}</div>
+                    <div class="dimmed-text">${parts[1]}</div>
                 `;
             } else {
-                html = `<div class="highlight-text">${q.text}</div>`;
-            }
-            textContainer.innerHTML = html;
-            
-            // Progress
-            let progress = (count % 10) * 10; 
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            document.getElementById('progress-text').innerText = Math.floor(count / 10) + 1;
-        }
-
-        // --- THE CSS SIGN ENGINE ---
-        function generateCSSSign(q) {
-            if(q.type === 'theory') {
-                return `<div class="w-24 h-24 rounded-full bg-slate-700/50 border-4 border-slate-600 flex items-center justify-center text-4xl text-blue-400"><i class="fas fa-${q.icon}"></i></div>`;
-            }
-
-            let innerContent = '';
-            if (q.textIcon) {
-                innerContent = `<span class="limit-text">${q.textIcon}</span>`;
-            } else if (q.icon) {
-                const rotation = q.rotateIcon ? `transform: rotate(${q.rotateIcon}deg);` : '';
-                const color = q.color ? `color: ${q.color};` : '';
-                innerContent = `<i class="fas fa-${q.icon}" style="${rotation} ${color}"></i>`;
-            }
-
-            switch(q.type) {
-                case 'danger':
-                    return `<div class="sign-danger">${innerContent}</div>`;
-                case 'prohibition':
-                    return `<div class="sign-prohibition">${innerContent}</div>`;
-                case 'obligation':
-                    return `<div class="sign-obligation">${innerContent}</div>`;
-                case 'stop':
-                    return `<div class="sign-stop"><span>STOP</span></div>`;
-                case 'yield':
-                    return `<div class="sign-yield"></div>`;
-                case 'priority':
-                    return `<div class="sign-priority"></div>`;
-                case 'no_entry':
-                    return `<div class="sign-no-entry"><div></div></div>`;
-                default:
-                    return '';
+                document.getElementById('qh-text').innerHTML = `<div class="highlight-text">${txt}</div>`;
             }
         }
 
-        function getTypeLabel(type) {
-            const map = {
-                'theory': 'TEORIA',
-                'danger': 'PERICOLO',
-                'prohibition': 'DIVIETO',
-                'obligation': 'OBBLIGO',
-                'stop': 'PRECEDENZA',
-                'yield': 'PRECEDENZA',
-                'priority': 'PRECEDENZA',
-                'no_entry': 'DIVIETO'
-            };
-            return map[type] || 'QUIZ';
+        // Fallback function: Called by onerror in HTML
+        function qh_imageError(img) {
+            document.getElementById('qh-loader').style.display = 'none';
+            img.style.display = 'none'; // Hide broken image
+            
+            // Enable CSS Fallback
+            const fallback = document.getElementById('qh-css-fallback');
+            fallback.classList.add('active');
+            fallback.innerHTML = qh_generateCSS(qh_curr);
         }
 
-        function handleAnswer(userChoice) {
-            const btn = userChoice ? document.getElementById('btn-true') : document.getElementById('btn-false');
-            btn.blur();
-            const isCorrect = (userChoice === currentQuestion.isTrue);
-            
-            const feedbackIcon = document.getElementById('feedback-icon');
-            const feedbackOverlay = document.getElementById('feedback');
-            
-            feedbackOverlay.classList.remove('hidden');
-            feedbackOverlay.classList.add('flex');
-            feedbackIcon.innerText = isCorrect ? '🔥' : '💀';
-            
-            requestAnimationFrame(() => {
-                feedbackIcon.classList.remove('scale-0');
-                feedbackIcon.classList.add('scale-150');
-            });
-
-            if (isCorrect) {
-                combo++; count++; score += (10 + combo * 2);
-            } else {
-                combo = 0; lives--;
-                document.getElementById('card').classList.add('shake');
+        function qh_generateCSS(q) {
+            let content = '';
+            if(q.txtIcon) content = `<span style="font-size:30px;font-weight:900;color:#333">${q.txtIcon}</span>`;
+            else if(q.icon) {
+                const rot = q.rotate ? `transform:rotate(${q.rotate}deg)` : '';
+                const col = q.color ? `color:${q.color}` : '';
+                content = `<i class="fas fa-${q.icon}" style="${rot};${col}"></i>`;
             }
+
+            if(q.type === 'danger') return `<div class="sign-danger">${content}</div>`;
+            if(q.type === 'prohibition') return `<div class="sign-prohibition">${content}</div>`;
+            if(q.type === 'obligation') return `<div class="sign-obligation">${content}</div>`;
+            if(q.type === 'stop') return `<div class="sign-prohibition" style="background:#cc0000; clip-path:polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); width:90px; height:90px; border:4px solid white"><span style="color:white;font-weight:900;font-size:24px">STOP</span></div>`;
+            if(q.type === 'priority') return `<div style="width:70px;height:70px;background:#ffcc00;border:6px solid white;transform:rotate(45deg);outline:2px solid black"></div>`;
             
-            updateStats();
+            return `<div class="text-xs text-slate-500">IMG MISSING</div>`;
+        }
+
+        function qh_answer(choice) {
+            const isCorrect = (choice === qh_curr.isTrue);
+            const fb = document.getElementById('qh-feedback');
+            const icon = document.getElementById('qh-feedback-icon');
+            
+            fb.classList.remove('hidden');
+            fb.classList.add('flex');
+            icon.innerText = isCorrect ? '🔥' : '💀';
+            icon.className = `text-9xl transform scale-150 transition-transform duration-200 ${isCorrect ? 'text-green-500' : 'text-red-500'}`;
+            
+            if(!isCorrect) {
+                qh_hp--;
+                qh_updateHearts();
+                if(qh_hp <= 0) {
+                    alert("GAME OVER! Ricarica per riprovare.");
+                    location.reload();
+                }
+            }
 
             setTimeout(() => {
-                feedbackOverlay.classList.add('hidden');
-                feedbackOverlay.classList.remove('flex');
-                feedbackIcon.classList.remove('scale-150');
-                feedbackIcon.classList.add('scale-0');
-                
-                if (lives <= 0) gameOver();
-                else nextCard();
-            }, 500);
+                fb.classList.add('hidden');
+                fb.classList.remove('flex');
+                qh_next();
+            }, 600);
         }
 
-        function updateStats() {
-            document.getElementById('combo-display').innerText = `x${combo}`;
-            let hearts = '';
-            for(let i=0; i<3; i++) hearts += (i < lives) ? '<i class="fas fa-heart"></i>' : '<i class="fas fa-heart-broken opacity-30"></i>';
-            document.getElementById('lives-display').innerHTML = hearts;
+        function qh_updateHearts() {
+            let h = '';
+            for(let i=0; i<3; i++) h += (i < qh_hp) ? '<i class="fas fa-heart"></i>' : '<i class="fas fa-heart-broken opacity-30"></i>';
+            document.getElementById('qh-lives').innerHTML = h;
         }
 
-        function gameOver() {
-            document.getElementById('game-over').classList.remove('hidden');
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('final-count').innerText = count;
+        // ==========================================
+        //        LOGIC APP 2: CODE BREAKER
+        // ==========================================
+        
+        const cb_levels = [
+            { pre: "Il segnale di STOP obbliga a", word: "FERMARSI", post: "alla striscia." },
+            { pre: "Il limite autostrada è", word: "130", post: "km/h." },
+            { pre: "La patente B vale", word: "DIECI", post: "anni." },
+            { pre: "Segnale triangolare punta in alto:", word: "PERICOLO", post: "." },
+            { pre: "Vietato il", word: "SORPASSO", post: "in curva." },
+            { pre: "Luci posteriori posizione colore", word: "ROSSO", post: "." },
+            { pre: "Cellulare consentito solo con", word: "AURICOLARE", post: "." }
+        ];
+
+        let cb_idx = 0;
+        let cb_user = [];
+        let cb_word = "";
+
+        function cb_init() {
+            document.getElementById('cb-start').classList.add('hidden');
+            cb_load(0);
         }
 
-        function resetGame() {
-            document.getElementById('game-over').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
-            document.getElementById('card').classList.add('hidden');
-            document.getElementById('card').classList.remove('flex');
-            document.getElementById('controls').classList.add('hidden');
-            document.getElementById('controls').classList.remove('grid');
+        function cb_load(i) {
+            if(i >= cb_levels.length) { alert("SISTEMA DECRIPTATO!"); cb_idx=0; } else { cb_idx = i; }
+            
+            const lvl = cb_levels[cb_idx];
+            cb_word = lvl.word;
+            cb_user = new Array(cb_word.length).fill("");
+            
+            document.getElementById('cb-lvl').innerText = cb_idx + 1;
+            document.getElementById('cb-question').innerHTML = `
+                <span class="opacity-70">${lvl.pre}</span><br>
+                <span class="text-green-500 text-xs tracking-widest my-2 block">[ CODICE ]</span>
+                <span class="opacity-70">${lvl.post}</span>
+            `;
+
+            // Render Slots
+            const slots = document.getElementById('cb-slots');
+            slots.innerHTML = '';
+            for(let k=0; k<cb_word.length; k++) {
+                const s = document.createElement('div');
+                s.className = 'slot w-8 h-10 flex items-center justify-center text-lg font-bold bg-slate-900';
+                s.id = `slot-${k}`;
+                slots.appendChild(s);
+            }
+            cb_highlight(0);
+
+            // Render Keys
+            const kb = document.getElementById('cb-keys');
+            kb.innerHTML = '';
+            let pool = cb_word.split('');
+            const alpha = "ABCDEFGHILMNOPQRSTUVZ0123456789";
+            for(let n=0; n<4; n++) pool.push(alpha[Math.floor(Math.random()*alpha.length)]);
+            pool.sort(() => Math.random()-0.5);
+            
+            pool.forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn h-10 active:scale-95 text-green-400 border-green-900';
+                btn.innerText = char;
+                btn.onclick = () => cb_type(char);
+                kb.appendChild(btn);
+            });
         }
+
+        function cb_type(char) {
+            const idx = cb_user.findIndex(c => c === "");
+            if(idx !== -1) {
+                cb_user[idx] = char;
+                const s = document.getElementById(`slot-${idx}`);
+                s.innerText = char;
+                s.classList.add('filled');
+                cb_highlight(idx+1);
+            }
+        }
+
+        function cb_delete() {
+            let idx = -1;
+            for(let i=cb_user.length-1; i>=0; i--) if(cb_user[i]!=="") { idx=i; break; }
+            if(idx !== -1) {
+                cb_user[idx] = "";
+                const s = document.getElementById(`slot-${idx}`);
+                s.innerText = "";
+                s.classList.remove('filled', 'correct', 'wrong');
+                cb_highlight(idx);
+            }
+        }
+
+        function cb_highlight(idx) {
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
+            const el = document.getElementById(`slot-${idx}`);
+            if(el) el.classList.add('active');
+        }
+
+        function cb_check() {
+            const attempt = cb_user.join("");
+            const container = document.getElementById('cb-slots');
+            
+            if(attempt === cb_word) {
+                document.querySelectorAll('.slot').forEach(s => s.classList.add('correct'));
+                document.getElementById('cb-msg').innerText = "ACCESSO CONSENTITO";
+                document.getElementById('cb-msg').classList.add('text-green-400');
+                setTimeout(() => cb_load(cb_idx + 1), 1000);
+            } else {
+                container.classList.add('shake');
+                document.querySelectorAll('.slot').forEach(s => s.classList.add('wrong'));
+                setTimeout(() => {
+                    container.classList.remove('shake');
+                    document.querySelectorAll('.slot').forEach(s => s.classList.remove('wrong'));
+                }, 500);
+            }
+        }
+
     </script>
 </body>
 </html>
