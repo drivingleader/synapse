@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Quiz Hacker - Official Edition</title>
+    <title>Quiz Hacker - CSS Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
-        /* Reset e Base per Mobile */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
@@ -17,11 +16,11 @@
             overflow: hidden;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            height: 100dvh; /* Dynamic Viewport Height per mobile */
+            height: 100dvh;
         }
 
         .gradient-text {
-            background: linear-gradient(to right, #4ade80, #3b82f6);
+            background: linear-gradient(to right, #fbbf24, #d97706);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -36,9 +35,8 @@
         .btn-press { transition: transform 0.05s, background-color 0.2s; }
         .btn-press:active { transform: scale(0.96); }
 
-        /* Typography Responsive */
         .dimmed-text { opacity: 0.5; font-size: 0.85rem; font-weight: 400; margin-bottom: 0.2rem; }
-        .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
         
         @media (max-height: 700px) {
             .highlight-text { font-size: 1.1rem; }
@@ -51,38 +49,111 @@
 
         .boss-mode { border: 2px solid #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
         
-        /* Progress Bar */
-        .progress-container { width: 100%; height: 4px; background: #1e293b; border-radius: 99px; margin-top: auto; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, #4ade80, #3b82f6); transition: width 0.3s ease; }
+        /* --- CSS SIGN GENERATOR ENGINE --- */
+        .sign-canvas { position: relative; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
         
-        /* Image Styling */
-        .ministerial-img {
-            height: 100%;
-            width: auto;
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            object-fit: contain;
-            background-color: white; /* Per i segnali trasparenti */
+        /* Danger (Triangle) */
+        .sign-danger {
+            width: 0; height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 104px solid #cc0000; /* Red Border */
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .sign-danger::after {
+            content: ''; position: absolute;
+            top: 6px; left: -45px;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+            border-bottom: 78px solid white; /* White Inner */
+        }
+        .sign-danger i {
+            position: absolute; top: 45px; left: -50%; transform: translateX(-50%);
+            color: #1a1a1a; font-size: 32px; z-index: 10;
+        }
+        
+        /* Prohibition (Circle Red) */
+        .sign-prohibition {
+            width: 110px; height: 110px;
+            background: white;
+            border: 14px solid #cc0000;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .sign-prohibition i { color: #1a1a1a; font-size: 45px; }
+        .sign-prohibition .limit-text { color: #1a1a1a; font-weight: 900; font-size: 45px; letter-spacing: -2px; }
+
+        /* Obligation (Circle Blue) */
+        .sign-obligation {
+            width: 110px; height: 110px;
+            background: #0055cc;
+            border: 4px solid white;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 0 2px #0055cc; /* Outer ring visual fix */
+        }
+        .sign-obligation i { color: white; font-size: 50px; }
+
+        /* Stop (Octagon) */
+        .sign-stop {
+            width: 110px; height: 110px;
+            background: #cc0000;
+            border: 4px solid white;
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .sign-stop span { color: white; font-weight: 900; font-size: 32px; letter-spacing: 1px; }
+
+        /* Yield (Inverted Triangle) */
+        .sign-yield {
+            width: 0; height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-top: 104px solid #cc0000;
+            position: relative;
+        }
+        .sign-yield::after {
+            content: ''; position: absolute;
+            top: -98px; left: -45px;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+            border-top: 78px solid white;
         }
 
-        /* Fallback CSS Signs (Ultima spiaggia) */
-        .sign-fallback-circle { width: 80px; height: 80px; border-radius: 50%; border: 10px solid #dc2626; background: white; }
-        .sign-fallback-triangle { width: 0; height: 0; border-left: 50px solid transparent; border-right: 50px solid transparent; border-bottom: 85px solid white; position: relative; }
-        .sign-fallback-triangle::after { content: ''; position: absolute; top: 6px; left: -42px; border-left: 42px solid transparent; border-right: 42px solid transparent; border-bottom: 72px solid #dc2626; }
+        /* Priority (Diamond) */
+        .sign-priority {
+            width: 80px; height: 80px;
+            background: #ffcc00;
+            border: 8px solid white;
+            outline: 2px solid black;
+            transform: rotate(45deg);
+            margin: 15px;
+        }
+
+        /* No Entry (Red Circle Bar) */
+        .sign-no-entry {
+            width: 110px; height: 110px;
+            background: #cc0000;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .sign-no-entry div { width: 70%; height: 20px; background: white; }
+
+        /* Progress Bar */
+        .progress-container { width: 100%; height: 4px; background: #1e293b; border-radius: 99px; margin-top: auto; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #fbbf24, #d97706); transition: width 0.3s ease; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-between p-4 max-w-md mx-auto h-full relative">
 
-    <!-- Header Stats -->
+    <!-- Header -->
     <div class="w-full flex justify-between items-center z-10 pt-2 h-[50px] shrink-0">
         <div class="flex flex-col">
             <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Combo</span>
             <span id="combo-display" class="text-2xl font-black text-yellow-400 leading-none">x0</span>
         </div>
-        
-        <div id="mini-logo" class="hidden text-sm font-black tracking-widest text-slate-600">QUIZ HACKER</div>
-
         <div class="flex flex-col items-end">
             <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Vite</span>
             <div id="lives-display" class="flex space-x-1 text-red-500 text-lg">
@@ -91,31 +162,19 @@
         </div>
     </div>
 
-    <!-- Main Card Area -->
+    <!-- Main Card -->
     <div id="quiz-container" class="flex-1 w-full flex flex-col justify-center relative my-2 min-h-0">
         
         <!-- Start Screen -->
         <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 rounded-3xl p-6 text-center z-50 shadow-2xl border border-slate-700">
             <div class="mb-6">
-                <i class="fas fa-brain text-5xl text-blue-500 mb-4 animate-bounce"></i>
+                <i class="fas fa-bolt text-5xl text-yellow-500 mb-4 animate-bounce"></i>
                 <h1 class="text-4xl font-black mb-1 leading-none"><span class="gradient-text">QUIZ<br>HACKER</span></h1>
-                <h2 class="text-xs font-bold text-slate-500 tracking-[0.2em] mt-2">OFFICIAL IMAGES</h2>
+                <h2 class="text-xs font-bold text-slate-500 tracking-[0.2em] mt-2">NO IMAGES • PURE CSS</h2>
             </div>
-            
-            <div class="bg-slate-900/50 p-4 rounded-xl mb-6 w-full border border-slate-700 backdrop-blur-sm">
-                <div class="flex justify-between text-xs text-slate-400 mb-2 uppercase">
-                    <span>Database</span>
-                    <span class="text-white font-bold">Ministeriale 2025</span>
-                </div>
-                <div class="flex justify-between text-xs text-slate-400 uppercase border-t border-slate-700 pt-2">
-                    <span>Immagini</span>
-                    <span class="text-green-400 font-bold">Multi-Source Load</span>
-                </div>
-            </div>
-
             <div class="space-y-3 w-full">
-                <button onclick="startGame('mix')" class="w-full py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-2xl font-bold text-lg shadow-lg shadow-blue-900/50 btn-press flex items-center justify-center gap-3">
-                    <i class="fas fa-rocket"></i> Inizia
+                <button onclick="startGame()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-500 active:bg-yellow-700 rounded-2xl font-bold text-lg shadow-lg shadow-yellow-900/50 btn-press flex items-center justify-center gap-3 text-white">
+                    <i class="fas fa-play"></i> Inizia Test
                 </button>
             </div>
         </div>
@@ -123,22 +182,18 @@
         <!-- Question Card -->
         <div id="card" class="bg-slate-800 w-full rounded-3xl p-6 shadow-2xl border-t border-slate-700 hidden flex flex-col items-center justify-between h-full max-h-[550px]">
             
-            <!-- Badges -->
             <div class="w-full flex justify-between items-start mb-2 h-6">
                  <div id="boss-badge" class="hidden bg-red-600 text-white text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest shadow-red-900/50 shadow-lg inline-block">
                     <i class="fas fa-skull"></i> Difficile
                 </div>
-                <div id="fig-badge" class="bg-slate-700 text-slate-300 text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest border border-slate-600 inline-block opacity-0">
-                    <!-- Figura ID injected here -->
+                <div id="type-badge" class="bg-slate-700 text-slate-300 text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest border border-slate-600 inline-block">
+                    <!-- Type injected here -->
                 </div>
             </div>
 
-            <!-- Image Container -->
-            <div id="sign-visual-container" class="w-full flex justify-center items-center h-36 mb-4 bg-slate-900/30 rounded-xl p-2 border border-slate-700/30 relative overflow-hidden">
-                <div id="loader" class="absolute inset-0 flex items-center justify-center text-slate-600">
-                    <i class="fas fa-circle-notch fa-spin text-2xl"></i>
-                </div>
-                <!-- Image injected via JS -->
+            <!-- CSS Sign Container -->
+            <div id="sign-visual-container" class="w-full flex justify-center items-center h-40 mb-2">
+                <!-- Generated CSS Sign goes here -->
             </div>
 
             <!-- Text -->
@@ -146,7 +201,7 @@
                 <!-- Content injected via JS -->
             </div>
             
-            <!-- Footer Progress -->
+            <!-- Footer -->
             <div class="w-full mt-4">
                  <div class="flex justify-between text-[10px] text-slate-500 uppercase mb-1 font-bold">
                     <span>Livello</span>
@@ -158,14 +213,14 @@
             </div>
         </div>
 
-        <!-- Feedback Overlay -->
+        <!-- Feedback -->
         <div id="feedback" class="absolute inset-0 hidden items-center justify-center z-40 rounded-3xl backdrop-blur-md bg-black/60 pointer-events-none">
             <div id="feedback-icon" class="text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl"></div>
         </div>
 
     </div>
 
-    <!-- Controls (Bottom) -->
+    <!-- Controls -->
     <div id="controls" class="w-full mt-2 mb-safe grid grid-cols-2 gap-3 hidden h-[140px] shrink-0">
         <button id="btn-false" onclick="handleAnswer(false)" class="h-full bg-slate-800 border-b-4 border-red-900 text-red-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all flex flex-col items-center justify-center group touch-none select-none outline-none focus:outline-none">
             <i class="fas fa-times text-3xl mb-1 group-active:scale-90 transition-transform"></i>
@@ -177,9 +232,9 @@
         </button>
     </div>
 
-    <!-- Game Over Screen -->
+    <!-- Game Over -->
     <div id="game-over" class="hidden absolute inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-8 text-center">
-        <div class="text-6xl mb-4 animate-bounce">🏆</div>
+        <div class="text-6xl mb-4 animate-bounce">🏁</div>
         <h2 class="text-3xl font-bold text-white mb-2">FINE PARTITA</h2>
         <div class="bg-slate-800 p-6 rounded-2xl w-full mb-8 border border-slate-700">
              <div class="flex justify-between text-slate-400 mb-2">
@@ -191,56 +246,79 @@
                 <span id="final-score" class="text-yellow-400 font-bold text-xl">0</span>
             </div>
         </div>
-       
         <button onclick="resetGame()" class="w-full py-4 bg-white text-slate-900 rounded-xl font-bold btn-press text-lg shadow-xl">Rigioca Subito</button>
     </div>
 
     <script>
-        // --- REAL DATABASE (With Official Figure IDs) ---
-        // Cleaned up: Definitions have no figureId. Signals use standard IDs.
+        // --- DATABASE: CSS RECREATABLE SIGNS & THEORY ONLY ---
+        // Icons: FontAwesome 6 classes (without 'fa-')
         const database = [
-            // --- VEICOLI (No Figure - Using Icons) ---
-            { "text": "I veicoli a due ruote, con motore termico fino a 50 cm3 e velocità max 45 km/h sono ciclomotori", "isTrue": true, "figureId": null, "icon": "motorcycle", "type": "solo", "prefix": "", "highlight": "MOTORE FINO A 50 cm3 = CICLOMOTORI", "id": "q_0" },
-            { "text": "I ciclomotori possono avere due o tre ruote", "isTrue": true, "figureId": null, "icon": "motorcycle", "type": "solo", "prefix": "", "highlight": "CICLOMOTORI possono avere 2 o 3 RUOTE", "id": "q_1" },
-            { "text": "I motocicli sono veicoli a due ruote di cilindrata superiore a 50 cm3", "isTrue": true, "figureId": null, "icon": "motorcycle", "type": "solo", "prefix": "", "highlight": "MOTOCICLI > 50 cm3", "id": "q_12" },
-            { "text": "L'autovettura è un veicolo destinato al trasporto di massimo nove persone, compreso il conducente", "isTrue": true, "figureId": null, "icon": "car", "type": "solo", "prefix": "", "highlight": "MAX 9 PERSONE compreso conducente", "id": "q_43" },
-            { "text": "Il casco non è obbligatorio per i conducenti maggiorenni di ciclomotori", "isTrue": false, "figureId": null, "icon": "helmet-safety", "type": "solo", "prefix": "", "highlight": "CASCO NON OBBLIGATORIO MAGGIORENNI", "id": "solo_7" },
+            // --- THEORY (Veicoli, Patente, Norme) ---
+            { text: "La patente di categoria B abilita a condurre le macchine agricole operatrici", isTrue: true, type: "theory", icon: "tractor", highlight: "PATENTE B macchine AGRICOLE" },
+            { text: "L'autovettura è un veicolo con massimo nove posti compreso il conducente", isTrue: true, type: "theory", icon: "car", highlight: "MAX 9 POSTI" },
+            { text: "I ciclomotori hanno cilindrata fino a 50 cm³", isTrue: true, type: "theory", icon: "motorcycle", highlight: "CICLOMOTORI 50 cm³" },
+            { text: "Il casco è obbligatorio per tutti i conducenti di motocicli", isTrue: true, type: "theory", icon: "helmet-safety", highlight: "CASCO OBBLIGATORIO" },
+            { text: "È vietato usare il cellulare alla guida senza auricolare", isTrue: true, type: "theory", icon: "mobile-screen", highlight: "VIETATO CELLULARE" },
+            { text: "La revisione dell'auto va fatta dopo 4 anni dalla prima immatricolazione", isTrue: true, type: "theory", icon: "wrench", highlight: "REVISIONE 4 ANNI" },
+            { text: "I neopatentati devono rispettare limiti di velocità specifici per 3 anni", isTrue: true, type: "theory", icon: "gauge", highlight: "LIMITI NEOPATENTATI" },
+            { text: "La sosta è vietata davanti ai passi carrabili", isTrue: true, type: "theory", icon: "ban", highlight: "SOSTA VIETATA PASSI CARRABILI" },
+            { text: "L'assicurazione RCA copre i danni causati a terzi", isTrue: true, type: "theory", icon: "file-shield", highlight: "RCA COPRE TERZI" },
+            { text: "La patente a punti prevede la decurtazione di 20 punti per guida in stato di ebbrezza", isTrue: false, type: "theory", icon: "beer-mug-empty", highlight: "DECURTAZIONE 20 PUNTI" }, // Falso, sono 10 solitamente
+            { text: "Sulle autostrade il limite massimo è di 150 km/h", isTrue: false, type: "theory", icon: "road", highlight: "AUTOSTRADA 150 KM/H" },
+            { text: "I quadricicli leggeri possono andare in autostrada", isTrue: false, type: "theory", icon: "motorcycle", highlight: "QUADRICICLI IN AUTOSTRADA" },
 
-            // --- SEGNALI DI PERICOLO (IDs Standard) ---
-            { "text": "Il segnale raffigurato preannuncia una strada deformata", "isTrue": true, "figureId": "1", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "STRADA DEFORMATA", "id": "sig_1" },
-            { "text": "Il segnale raffigurato preannuncia un dosso", "isTrue": true, "figureId": "2", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "un DOSSO", "id": "sig_2" },
-            { "text": "Il segnale raffigurato preannuncia una curva pericolosa a destra", "isTrue": true, "figureId": "3", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "CURVA A DESTRA", "id": "sig_3" },
-            { "text": "Il segnale raffigurato preannuncia una curva pericolosa a sinistra", "isTrue": true, "figureId": "4", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "CURVA A SINISTRA", "id": "sig_4" },
-            { "text": "Il segnale raffigurato preannuncia un passaggio a livello senza barriere", "isTrue": true, "figureId": "11", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "PASSAGGIO A LIVELLO SENZA BARRIERE", "id": "sig_11" },
-            { "text": "Il segnale raffigurato preannuncia materiale instabile sulla strada", "isTrue": true, "figureId": "22", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "MATERIALE INSTABILE", "id": "sig_22" },
-            { "text": "Il segnale raffigurato preannuncia la presenza di bambini", "isTrue": true, "figureId": "24", "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "presenza di BAMBINI", "id": "sig_24" },
+            // --- CSS SIGNS: PERICOLO (Triangle) ---
+            { text: "Il segnale raffigurato preannuncia una curva a destra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: 90, highlight: "CURVA A DESTRA" },
+            { text: "Il segnale raffigurato preannuncia una curva a sinistra", isTrue: true, type: "danger", icon: "turn-up", rotateIcon: -90, highlight: "CURVA A SINISTRA" },
+            { text: "Il segnale raffigurato preannuncia un dosso", isTrue: true, type: "danger", icon: "align-center", highlight: "DOSSO" }, // Placeholder for humps
+            { text: "Il segnale raffigurato preannuncia bambini", isTrue: true, type: "danger", icon: "child-reaching", highlight: "BAMBINI" },
+            { text: "Il segnale raffigurato preannuncia semaforo", isTrue: true, type: "danger", icon: "traffic-light", highlight: "SEMAFORO" },
+            { text: "Il segnale raffigurato preannuncia lavori in corso", isTrue: true, type: "danger", icon: "person-digging", highlight: "LAVORI IN CORSO" },
+            { text: "Il segnale raffigurato preannuncia attraversamento pedonale", isTrue: true, type: "danger", icon: "person-walking", highlight: "PEDONI" },
+            { text: "Il segnale raffigurato preannuncia animali domestici", isTrue: true, type: "danger", icon: "cow", highlight: "ANIMALI DOMESTICI" },
+            { text: "Il segnale raffigurato preannuncia animali selvatici", isTrue: true, type: "danger", icon: "deer", highlight: "ANIMALI SELVATICI" },
+            { text: "Il segnale raffigurato preannuncia vento laterale", isTrue: true, type: "danger", icon: "wind", highlight: "VENTO FORTE" },
+            { text: "Il segnale raffigurato preannuncia caduta massi", isTrue: true, type: "danger", icon: "hill-rockslide", highlight: "CADUTA MASSI" },
+            { text: "Il segnale raffigurato preannuncia strada sdrucciolevole", isTrue: true, type: "danger", icon: "car-burst", highlight: "STRADA SDRUCCIOLEVOLE" },
             
-            // --- SEGNALI DI PRECEDENZA ---
-            { "text": "Il segnale raffigurato obbliga a dare la precedenza", "isTrue": true, "figureId": "36", "type": "cluster", "prefix": "Il segnale raffigurato", "highlight": "DARE PRECEDENZA", "id": "sig_36" },
-            { "text": "Il segnale raffigurato obbliga a fermarsi e dare la precedenza (STOP)", "isTrue": true, "figureId": "37", "type": "cluster", "prefix": "Il segnale raffigurato obbliga", "highlight": "FERMARSI E DARE PRECEDENZA", "id": "sig_37" },
-            { "text": "Il segnale raffigurato indica l'intersezione con precedenza a destra", "isTrue": true, "figureId": "40", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "PRECEDENZA A DESTRA", "id": "sig_40" },
-            { "text": "Il segnale raffigurato indica il diritto di precedenza", "isTrue": true, "figureId": "43", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "DIRITTO DI PRECEDENZA", "id": "sig_43" },
+            // --- CSS SIGNS: DIVIETO (Circle Red) ---
+            { text: "Il segnale raffigurato vieta il transito alle biciclette", isTrue: true, type: "prohibition", icon: "bicycle", highlight: "VIETATO BICICLETTE" },
+            { text: "Il segnale raffigurato vieta il transito ai pedoni", isTrue: true, type: "prohibition", icon: "person-walking", highlight: "VIETATO PEDONI" },
+            { text: "Il segnale raffigurato vieta il transito ai motocicli", isTrue: true, type: "prohibition", icon: "motorcycle", highlight: "VIETATO MOTO" },
+            { text: "Il segnale raffigurato vieta il transito agli autobus", isTrue: true, type: "prohibition", icon: "bus", highlight: "VIETATO AUTOBUS" },
+            { text: "Il segnale raffigurato vieta il transito agli autocarri", isTrue: true, type: "prohibition", icon: "truck", highlight: "VIETATO AUTOCARRI" },
+            { text: "Il segnale raffigurato indica limite massimo di velocità 50", isTrue: true, type: "prohibition", textIcon: "50", highlight: "LIMITE 50" },
+            { text: "Il segnale raffigurato indica limite massimo di velocità 30", isTrue: true, type: "prohibition", textIcon: "30", highlight: "LIMITE 30" },
+            { text: "Il segnale raffigurato vieta di suonare il clacson", isTrue: true, type: "prohibition", icon: "bullhorn", highlight: "VIETATO CLACSON" },
+            { text: "Il segnale raffigurato vieta il sorpasso", isTrue: true, type: "prohibition", icon: "car-side", color: "#1a1a1a", highlight: "DIVIETO SORPASSO" },
+            { text: "Il segnale raffigurato vieta il transito (Divieto di Transito)", isTrue: true, type: "prohibition", icon: "circle", color: "white", highlight: "DIVIETO DI TRANSITO" }, // Empty white circle with red border
             
-            // --- SEGNALI DI DIVIETO ---
-            { "text": "Il segnale raffigurato vieta il transito a tutti i veicoli", "isTrue": true, "figureId": "46", "type": "cluster", "prefix": "Il segnale raffigurato vieta", "highlight": "DIVIETO DI TRANSITO", "id": "sig_46" },
-            { "text": "Il segnale raffigurato vieta il sorpasso", "isTrue": true, "figureId": "54", "type": "cluster", "prefix": "Il segnale raffigurato vieta", "highlight": "DIVIETO DI SORPASSO", "id": "sig_54" },
-            { "text": "Il segnale raffigurato indica il limite massimo di velocità 50 km/h", "isTrue": true, "figureId": "61", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "LIMITE MAX 50 km/h", "id": "sig_61" },
-            { "text": "Il segnale raffigurato vieta la sosta", "isTrue": true, "figureId": "76", "type": "cluster", "prefix": "Il segnale raffigurato vieta", "highlight": "DIVIETO DI SOSTA", "id": "sig_76" },
-            { "text": "Il segnale raffigurato indica un passo carrabile", "isTrue": true, "figureId": "78", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "PASSO CARRABILE", "id": "sig_78" },
+            // --- CSS SIGNS: OBBLIGO (Circle Blue) ---
+            { text: "Il segnale raffigurato indica direzione obbligatoria dritto", isTrue: true, type: "obligation", icon: "arrow-up", highlight: "OBBLIGO DRITTO" },
+            { text: "Il segnale raffigurato indica direzione obbligatoria destra", isTrue: true, type: "obligation", icon: "arrow-right", highlight: "OBBLIGO DESTRA" },
+            { text: "Il segnale raffigurato indica direzione obbligatoria sinistra", isTrue: true, type: "obligation", icon: "arrow-left", highlight: "OBBLIGO SINISTRA" },
+            { text: "Il segnale raffigurato indica rotatoria", isTrue: true, type: "obligation", icon: "arrows-spin", highlight: "ROTATORIA" },
+            { text: "Il segnale raffigurato indica percorso pedonale", isTrue: true, type: "obligation", icon: "person-walking", highlight: "PERCORSO PEDONALE" },
+            { text: "Il segnale raffigurato indica pista ciclabile", isTrue: true, type: "obligation", icon: "bicycle", highlight: "PISTA CICLABILE" },
+            { text: "Il segnale raffigurato indica limite minimo di velocità 30", isTrue: true, type: "obligation", textIcon: "30", highlight: "LIMITE MINIMO 30" },
 
-            // --- SEGNALI DI OBBLIGO ---
-            { "text": "Il segnale raffigurato indica direzione obbligatoria a destra", "isTrue": true, "figureId": "80", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "DIREZIONE OBBLIGATORIA DESTRA", "id": "sig_80" },
-            { "text": "Il segnale raffigurato indica una rotatoria", "isTrue": true, "figureId": "84", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "ROTATORIA", "id": "sig_84" },
-            { "text": "Il segnale raffigurato indica un percorso pedonale", "isTrue": true, "figureId": "88", "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "PERCORSO PEDONALE", "id": "sig_88" },
-            
-            // --- TRAPPOLE E FALSI ---
-            { "text": "Il segnale raffigurato (STOP) permette di passare se non c'è nessuno", "isTrue": false, "figureId": "37", "type": "cluster", "prefix": "Il segnale raffigurato", "highlight": "passare se non c'è nessuno", "id": "tr_1" },
-            { "text": "Il segnale raffigurato (Divieto Sosta) vieta la fermata", "isTrue": false, "figureId": "76", "type": "cluster", "prefix": "Il segnale raffigurato", "highlight": "VIETA LA FERMATA", "id": "tr_2" },
-            { "text": "Il segnale raffigurato (Bambini) indica una scuola", "isTrue": false, "figureId": "24", "type": "cluster", "prefix": "Il segnale raffigurato", "highlight": "indica una SCUOLA", "id": "tr_3" },
-            { "text": "Il segnale raffigurato (Passo Carrabile) consente la sosta breve", "isTrue": false, "figureId": "78", "type": "cluster", "prefix": "Il segnale raffigurato", "highlight": "consente SOSTA BREVE", "id": "tr_4" },
+            // --- CSS SIGNS: SPECIALI (Stop, Yield, NoEntry) ---
+            { text: "Il segnale raffigurato obbliga a fermarsi e dare precedenza", isTrue: true, type: "stop", highlight: "STOP" },
+            { text: "Il segnale raffigurato indica di dare precedenza", isTrue: true, type: "yield", highlight: "DARE PRECEDENZA" },
+            { text: "Il segnale raffigurato vieta l'accesso (Senso Vietato)", isTrue: true, type: "no_entry", highlight: "SENSO VIETATO" },
+            { text: "Il segnale raffigurato indica diritto di precedenza", isTrue: true, type: "priority", highlight: "DIRITTO PRECEDENZA" },
+
+            // --- TRAPPOLE (False Flags) ---
+            { text: "Il segnale raffigurato (STOP) permette di passare rallentando", isTrue: false, type: "stop", highlight: "STOP = PASSARE PIANO" },
+            { text: "Il segnale raffigurato (Bambini) indica una scuola", isTrue: false, type: "danger", icon: "child-reaching", highlight: "BAMBINI = SCUOLA" },
+            { text: "Il segnale raffigurato (Divieto 50) è un limite minimo", isTrue: false, type: "prohibition", textIcon: "50", highlight: "DIVIETO 50 = MINIMO" },
+            { text: "Il segnale raffigurato (Obbligo Dritto) indica senso unico", isTrue: false, type: "obligation", icon: "arrow-up", highlight: "OBBLIGO DRITTO = SENSO UNICO" },
+            { text: "Il segnale raffigurato (Lavori) indica uomini al lavoro in fabbrica", isTrue: false, type: "danger", icon: "person-digging", highlight: "LAVORI IN FABBRICA" },
+            { text: "Il segnale raffigurato (Animali) indica uno zoo", isTrue: false, type: "danger", icon: "deer", highlight: "ANIMALI = ZOO" },
+            { text: "Il segnale raffigurato (Senso Vietato) indica divieto di sosta", isTrue: false, type: "no_entry", highlight: "SENSO VIETATO = SOSTA" }
         ];
 
-        // --- GAME STATE ---
+        // --- GAME LOGIC ---
         let currentPool = [];
         let currentQuestion = null;
         let score = 0;
@@ -248,15 +326,12 @@
         let combo = 0;
         let count = 0;
 
-        // --- CORE LOGIC ---
-
-        function startGame(mode) {
+        function startGame() {
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('card').classList.remove('hidden');
             document.getElementById('card').classList.add('flex');
             document.getElementById('controls').classList.remove('hidden');
             document.getElementById('controls').classList.add('grid');
-            document.getElementById('mini-logo').classList.remove('hidden');
             
             lives = 3;
             combo = 0;
@@ -264,189 +339,145 @@
             count = 0;
             updateStats();
 
-            // Load data
-            currentPool = [...database];
+            // Populate pool with duplicates to simulate "infinite"
+            currentPool = [...database, ...database, ...database]; 
             currentPool.sort(() => Math.random() - 0.5);
             nextCard();
         }
 
         function nextCard() {
             if (currentPool.length === 0) {
-                alert("Database completato! Ricarico le domande...");
-                startGame('mix');
-                return;
+                // Refill if empty
+                currentPool = [...database];
+                currentPool.sort(() => Math.random() - 0.5);
             }
 
             currentQuestion = currentPool.pop();
             renderCard(currentQuestion);
-            
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
+            if(document.activeElement) document.activeElement.blur();
         }
 
         function renderCard(q) {
             const card = document.getElementById('card');
             const textContainer = document.getElementById('question-text');
+            const visualContainer = document.getElementById('sign-visual-container');
+            const typeBadge = document.getElementById('type-badge');
             const bossBadge = document.getElementById('boss-badge');
-            const figBadge = document.getElementById('fig-badge');
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-            const signContainer = document.getElementById('sign-visual-container');
-            const loader = document.getElementById('loader');
             
-            // Animation Reset
+            // Anim reset
             card.classList.remove('card-enter', 'shake', 'boss-mode');
-            void card.offsetWidth; 
-            card.classList.add('card-enter');
+            void card.offsetWidth; card.classList.add('card-enter');
 
-            // Difficulty UI
-            if (q.type === 'solo' || !q.isTrue) {
-                if(Math.random() > 0.5) card.classList.add('boss-mode');
-            }
+            // Draw Visual
+            visualContainer.innerHTML = generateCSSSign(q);
 
-            // Figure Badge
-            if(q.figureId) {
-                figBadge.innerText = `FIGURA ${q.figureId}`;
-                figBadge.classList.remove('opacity-0');
-            } else {
-                figBadge.classList.add('opacity-0');
-            }
-            bossBadge.classList.toggle('hidden', q.type !== 'solo');
+            // Badges
+            typeBadge.innerText = getTypeLabel(q.type);
+            bossBadge.classList.toggle('hidden', q.isTrue); // Arbitrary "Boss" logic for false/tricky
 
-            // --- IMAGE LOADING SYSTEM ---
-            loader.classList.remove('hidden');
+            // Text
+            textContainer.innerHTML = `
+                <div class="dimmed-text">${q.text.split(q.highlight)[0] || 'Domanda:'}</div>
+                <div class="highlight-text">${q.highlight || q.text}</div>
+            `;
             
-            if (q.figureId) {
-                // Try primary source, fallback to secondary
-                // Use a standard ID string (no padding usually for these sources)
-                const id = q.figureId;
-                const primaryUrl = `https://www.rmastri.it/new_quiz/img/fig${id}.jpg`;
-                const backupUrl = `https://www.patentati.it/img/quiz/b/figure/${id}.png`;
-                
-                signContainer.innerHTML = `
-                    <div id="loader" class="absolute inset-0 flex items-center justify-center text-slate-600">
-                        <i class="fas fa-circle-notch fa-spin text-2xl"></i>
-                    </div>
-                    <img id="quiz-img" 
-                         src="${primaryUrl}" 
-                         class="ministerial-img hidden" 
-                         alt="Figura ${id}"
-                         onload="this.classList.remove('hidden'); document.getElementById('loader').classList.add('hidden');"
-                         onerror="tryBackupImage(this, '${backupUrl}', '${id}')">
-                `;
-            } else {
-                // No Figure - Use Icon
-                loader.classList.add('hidden');
-                const iconClass = q.icon ? `fa-${q.icon}` : 'fa-traffic-light';
-                signContainer.innerHTML = `
-                    <div class="w-24 h-24 rounded-full bg-slate-700/50 flex items-center justify-center text-5xl text-blue-400 border-4 border-slate-600">
-                        <i class="fas ${iconClass}"></i>
-                    </div>
-                `;
-            }
-
-            // Text Logic (80/20)
-            if (q.type === 'cluster' && q.prefix) {
-                textContainer.innerHTML = `
-                    <div class="dimmed-text">${q.prefix}...</div>
-                    <div class="highlight-text">${q.highlight}</div>
-                `;
-            } else {
-                textContainer.innerHTML = `
-                    <div class="text-xl font-medium leading-snug">${q.text.replace(q.highlight, `<span class="text-yellow-400 font-bold border-b-2 border-yellow-500/50">${q.highlight}</span>`)}</div>
-                `;
-            }
-            
+            // Progress
             let progress = (count % 10) * 10; 
-            progressBar.style.width = `${progress}%`;
-            progressText.innerText = Math.floor(count / 10) + 1;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').innerText = Math.floor(count / 10) + 1;
         }
 
-        // --- ROBUST IMAGE FALLBACK SYSTEM ---
-        function tryBackupImage(imgElement, backupUrl, id) {
-            console.log("Primary image failed. Trying backup...");
-            imgElement.onerror = function() {
-                // If backup fails, show CSS fallback or placeholder
-                console.log("Backup image failed.");
-                document.getElementById('loader').classList.add('hidden');
-                imgElement.parentElement.innerHTML = `
-                    <div class="flex flex-col items-center justify-center text-slate-500 h-full w-full bg-slate-800 rounded-lg border border-slate-700">
-                        <i class="fas fa-image-slash text-2xl mb-1"></i>
-                        <span class="text-[10px] uppercase font-bold">Img non disponibile</span>
-                        <span class="text-[9px]">Fig. ${id}</span>
-                    </div>
-                `;
+        // --- THE CSS SIGN ENGINE ---
+        function generateCSSSign(q) {
+            if(q.type === 'theory') {
+                return `<div class="w-24 h-24 rounded-full bg-slate-700/50 border-4 border-slate-600 flex items-center justify-center text-4xl text-blue-400"><i class="fas fa-${q.icon}"></i></div>`;
+            }
+
+            let innerContent = '';
+            if (q.textIcon) {
+                innerContent = `<span class="limit-text">${q.textIcon}</span>`;
+            } else if (q.icon) {
+                const rotation = q.rotateIcon ? `transform: rotate(${q.rotateIcon}deg);` : '';
+                const color = q.color ? `color: ${q.color};` : '';
+                innerContent = `<i class="fas fa-${q.icon}" style="${rotation} ${color}"></i>`;
+            }
+
+            switch(q.type) {
+                case 'danger':
+                    return `<div class="sign-danger">${innerContent}</div>`;
+                case 'prohibition':
+                    return `<div class="sign-prohibition">${innerContent}</div>`;
+                case 'obligation':
+                    return `<div class="sign-obligation">${innerContent}</div>`;
+                case 'stop':
+                    return `<div class="sign-stop"><span>STOP</span></div>`;
+                case 'yield':
+                    return `<div class="sign-yield"></div>`;
+                case 'priority':
+                    return `<div class="sign-priority"></div>`;
+                case 'no_entry':
+                    return `<div class="sign-no-entry"><div></div></div>`;
+                default:
+                    return '';
+            }
+        }
+
+        function getTypeLabel(type) {
+            const map = {
+                'theory': 'TEORIA',
+                'danger': 'PERICOLO',
+                'prohibition': 'DIVIETO',
+                'obligation': 'OBBLIGO',
+                'stop': 'PRECEDENZA',
+                'yield': 'PRECEDENZA',
+                'priority': 'PRECEDENZA',
+                'no_entry': 'DIVIETO'
             };
-            imgElement.src = backupUrl;
+            return map[type] || 'QUIZ';
         }
 
         function handleAnswer(userChoice) {
             const btn = userChoice ? document.getElementById('btn-true') : document.getElementById('btn-false');
             btn.blur();
-
             const isCorrect = (userChoice === currentQuestion.isTrue);
             
-            showFeedback(isCorrect);
-
-            if (isCorrect) {
-                combo++;
-                count++;
-                score += (10 + (combo * 2));
-                if(currentQuestion.type === 'solo') score += 50;
-            } else {
-                combo = 0;
-                lives--;
-                document.getElementById('card').classList.add('shake');
-            }
-
-            updateStats();
-
-            if (lives <= 0) {
-                setTimeout(gameOver, 800);
-            } else {
-                setTimeout(nextCard, 500);
-            }
-        }
-
-        function showFeedback(isCorrect) {
-            const overlay = document.getElementById('feedback');
-            const icon = document.getElementById('feedback-icon');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackOverlay = document.getElementById('feedback');
             
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            
-            if (isCorrect) {
-                icon.innerHTML = '🔥';
-                icon.className = 'text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl text-green-500';
-            } else {
-                icon.innerHTML = '💀';
-                icon.className = 'text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl text-red-500';
-            }
+            feedbackOverlay.classList.remove('hidden');
+            feedbackOverlay.classList.add('flex');
+            feedbackIcon.innerText = isCorrect ? '🔥' : '💀';
             
             requestAnimationFrame(() => {
-                icon.classList.remove('scale-0');
-                icon.classList.add('scale-150');
+                feedbackIcon.classList.remove('scale-0');
+                feedbackIcon.classList.add('scale-150');
             });
 
+            if (isCorrect) {
+                combo++; count++; score += (10 + combo * 2);
+            } else {
+                combo = 0; lives--;
+                document.getElementById('card').classList.add('shake');
+            }
+            
+            updateStats();
+
             setTimeout(() => {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                icon.classList.remove('scale-150');
-                icon.classList.add('scale-0');
+                feedbackOverlay.classList.add('hidden');
+                feedbackOverlay.classList.remove('flex');
+                feedbackIcon.classList.remove('scale-150');
+                feedbackIcon.classList.add('scale-0');
+                
+                if (lives <= 0) gameOver();
+                else nextCard();
             }, 500);
         }
 
         function updateStats() {
             document.getElementById('combo-display').innerText = `x${combo}`;
-            document.getElementById('lives-display').innerHTML = '';
-            for(let i=0; i<3; i++) {
-                if(i < lives) {
-                    document.getElementById('lives-display').innerHTML += '<i class="fas fa-heart"></i>';
-                } else {
-                    document.getElementById('lives-display').innerHTML += '<i class="fas fa-heart-broken opacity-30"></i>';
-                }
-            }
+            let hearts = '';
+            for(let i=0; i<3; i++) hearts += (i < lives) ? '<i class="fas fa-heart"></i>' : '<i class="fas fa-heart-broken opacity-30"></i>';
+            document.getElementById('lives-display').innerHTML = hearts;
         }
 
         function gameOver() {
@@ -462,9 +493,7 @@
             document.getElementById('card').classList.remove('flex');
             document.getElementById('controls').classList.add('hidden');
             document.getElementById('controls').classList.remove('grid');
-            document.getElementById('mini-logo').classList.add('hidden');
         }
-
     </script>
 </body>
 </html>
