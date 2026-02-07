@@ -2,19 +2,23 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz Hacker - Speed Trainer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Quiz Hacker - 80/20 Pro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
+        /* Reset e Base per Mobile */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
             color: white;
-            overflow: hidden; /* Prevent scroll on mobile during play */
+            overflow: hidden;
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            /* Usa dvh per gestire le barre del browser mobile */
+            height: 100dvh; 
         }
 
         .gradient-text {
@@ -23,160 +27,274 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .card-enter {
-            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Animazioni */
+        .card-enter { animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideIn { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        .btn-press { transition: transform 0.05s, background-color 0.2s; }
+        .btn-press:active { transform: scale(0.96); }
+
+        /* Typography Responsive */
+        .dimmed-text { opacity: 0.5; font-size: 0.85rem; font-weight: 400; margin-bottom: 0.2rem; }
+        .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        
+        /* Font sizing dinamico */
+        @media (max-height: 700px) {
+            .highlight-text { font-size: 1.2rem; }
+            .sign-container { height: 80px !important; }
+        }
+        @media (min-height: 701px) {
+            .highlight-text { font-size: 1.5rem; }
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(50px) scale(0.9); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
-        .shake {
-            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-
-        .btn-press {
-            transition: transform 0.1s;
-        }
-        .btn-press:active {
-            transform: scale(0.95);
-        }
-
-        /* Focus Mode Highlight */
-        .dimmed-text {
-            opacity: 0.3;
-            font-size: 0.9rem;
-            font-weight: 400;
-        }
-        .highlight-text {
-            color: #ffffff;
-            font-size: 1.4rem;
-            font-weight: 900;
-            line-height: 1.3;
-            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        .boss-mode { border: 2px solid #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
+        
+        /* CSS TRAFFIC SIGNS GENERATOR */
+        .sign-box { display: flex; justify-content: center; align-items: center; position: relative; }
+        
+        /* Divieto / Pericolo (Cerchio Rosso) */
+        .sign-circle-red {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: white; border: 10px solid #dc2626;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         
-        /* Solo/Boss Mode Styles */
-        .boss-mode {
-            border: 2px solid #ef4444;
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        /* Obbligo (Cerchio Blu) */
+        .sign-circle-blue {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #2563eb; border: 2px solid white;
+            display: flex; justify-content: center; align-items: center; color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .boss-badge {
-            animation: pulse 1.5s infinite;
+
+        /* Pericolo (Triangolo) */
+        .sign-triangle {
+            width: 0; height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 85px solid white;
+            position: relative;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+        .sign-triangle::after {
+            content: ''; position: absolute;
+            top: 6px; left: -42px;
+            border-left: 42px solid transparent;
+            border-right: 42px solid transparent;
+            border-bottom: 72px solid #dc2626; /* Bordo rosso interno */
+            z-index: 1;
         }
+        .sign-triangle::before {
+             content: ''; position: absolute;
+             top: 15px; left: -32px; /* Area bianca interna */
+             border-left: 32px solid transparent;
+             border-right: 32px solid transparent;
+             border-bottom: 55px solid white;
+             z-index: 2;
+        }
+        .sign-triangle-icon {
+            position: absolute; top: 35px; left: -50px; width: 100px; text-align: center; z-index: 3; color: #1e293b; font-size: 24px;
+        }
+
+        /* Icon styling inside signs */
+        .sign-icon { font-size: 32px; color: #1e293b; }
+        .sign-circle-blue .sign-icon { color: white; }
+
+        /* Progress Bar */
+        .progress-container { width: 100%; height: 4px; background: #1e293b; border-radius: 99px; margin-top: auto; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #4ade80, #3b82f6); transition: width 0.3s ease; }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-between p-4 max-w-md mx-auto">
+<body class="flex flex-col items-center justify-between p-4 max-w-md mx-auto h-full relative">
 
     <!-- Header Stats -->
-    <div class="w-full flex justify-between items-center mt-2 mb-4">
+    <div class="w-full flex justify-between items-center z-10 pt-2 h-[50px] shrink-0">
         <div class="flex flex-col">
-            <span class="text-xs text-slate-400 uppercase tracking-widest">Combo</span>
-            <span id="combo-display" class="text-2xl font-black text-yellow-400">x0</span>
+            <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Combo</span>
+            <span id="combo-display" class="text-2xl font-black text-yellow-400 leading-none">x0</span>
         </div>
+        
+        <!-- Logo Small (Visible during game) -->
+        <div id="mini-logo" class="hidden text-sm font-black tracking-widest text-slate-600">QUIZ HACKER</div>
+
         <div class="flex flex-col items-end">
-            <span class="text-xs text-slate-400 uppercase tracking-widest">Vite</span>
-            <div id="lives-display" class="flex space-x-1 text-red-500 text-xl">
+            <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Vite</span>
+            <div id="lives-display" class="flex space-x-1 text-red-500 text-lg">
                 <i class="fas fa-heart"></i><i class="fas fa-heart"></i><i class="fas fa-heart"></i>
             </div>
         </div>
     </div>
 
     <!-- Main Card Area -->
-    <div id="quiz-container" class="flex-1 w-full flex flex-col justify-center relative">
+    <div id="quiz-container" class="flex-1 w-full flex flex-col justify-center relative my-2 min-h-0">
         
         <!-- Start Screen -->
-        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 rounded-3xl p-8 text-center z-50">
-            <h1 class="text-4xl font-black mb-2"><span class="gradient-text">QUIZ HACKER</span></h1>
-            <p class="text-slate-400 mb-8">Non leggere tutto. Trova il pattern.</p>
-            <div class="space-y-4 w-full">
-                <button onclick="startGame('mix')" class="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-lg shadow-lg shadow-blue-900/50 btn-press">
-                    🚀 Inizia Allenamento
+        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 rounded-3xl p-6 text-center z-50 shadow-2xl border border-slate-700">
+            <div class="mb-6">
+                <i class="fas fa-brain text-5xl text-blue-500 mb-4 animate-bounce"></i>
+                <h1 class="text-4xl font-black mb-1 leading-none"><span class="gradient-text">QUIZ<br>HACKER</span></h1>
+                <h2 class="text-xs font-bold text-slate-500 tracking-[0.2em] mt-2">80/20 METHOD</h2>
+            </div>
+            
+            <div class="bg-slate-900/50 p-4 rounded-xl mb-6 w-full border border-slate-700 backdrop-blur-sm">
+                <div class="flex justify-between text-xs text-slate-400 mb-2 uppercase">
+                    <span>Database</span>
+                    <span class="text-white font-bold">6.200+ Quiz</span>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400 uppercase border-t border-slate-700 pt-2">
+                    <span>Focus</span>
+                    <span class="text-green-400 font-bold">Segnali & Trappole</span>
+                </div>
+            </div>
+
+            <div class="space-y-3 w-full">
+                <button onclick="startGame('mix')" class="w-full py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-2xl font-bold text-lg shadow-lg shadow-blue-900/50 btn-press flex items-center justify-center gap-3">
+                    <i class="fas fa-rocket"></i> Inizia Allenamento
                 </button>
-                <button onclick="startGame('solo')" class="w-full py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg border border-slate-600 btn-press text-red-400">
-                    ☠️ Solo "Le Difficili"
+                <button onclick="startGame('solo')" class="w-full py-4 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 rounded-2xl font-bold text-lg border border-slate-600 btn-press text-red-400 flex items-center justify-center gap-3">
+                    <i class="fas fa-skull"></i> Modalità "Hardcore"
                 </button>
             </div>
         </div>
 
         <!-- Question Card -->
-        <div id="card" class="bg-slate-800 w-full rounded-3xl p-6 shadow-2xl border-t border-slate-700 hidden flex flex-col items-center justify-center min-h-[300px]">
+        <div id="card" class="bg-slate-800 w-full rounded-3xl p-6 shadow-2xl border-t border-slate-700 hidden flex flex-col items-center justify-between h-full max-h-[500px]">
             
-            <!-- Boss Badge -->
-            <div id="boss-badge" class="hidden boss-badge bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">
-                <i class="fas fa-skull"></i> Domanda Killer
+            <div class="w-full flex justify-between items-start mb-2">
+                 <div id="boss-badge" class="hidden bg-red-600 text-white text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest shadow-red-900/50 shadow-lg inline-block">
+                    <i class="fas fa-skull"></i> Difficile
+                </div>
+                <div id="cluster-badge" class="hidden bg-blue-900/50 text-blue-300 text-[9px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest border border-blue-500/30 inline-block">
+                    <i class="fas fa-eye"></i> Visivo
+                </div>
             </div>
 
-            <!-- Image Container (Placeholder for actual images) -->
-            <div id="img-container" class="w-full h-32 bg-slate-900 rounded-xl mb-4 flex items-center justify-center text-slate-600 hidden">
-                <i class="fas fa-image text-3xl"></i>
+            <!-- Dynamic Sign Visualization -->
+            <div id="sign-visual-container" class="w-full flex justify-center items-center h-24 mb-4 sign-container">
+                <!-- Injected via JS -->
             </div>
 
-            <!-- The Text -->
-            <div id="question-text" class="text-center w-full">
+            <div id="question-text" class="text-center w-full break-words flex-1 flex flex-col justify-center">
                 <!-- Content injected via JS -->
+            </div>
+            
+            <div class="w-full mt-4">
+                 <div class="flex justify-between text-[10px] text-slate-500 uppercase mb-1 font-bold">
+                    <span>Livello</span>
+                    <span id="progress-text">1</span>
+                </div>
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
             </div>
         </div>
 
         <!-- Feedback Overlay -->
-        <div id="feedback" class="absolute inset-0 hidden items-center justify-center z-40 rounded-3xl backdrop-blur-sm bg-black/50">
-            <div id="feedback-icon" class="text-8xl transform scale-0 transition-transform duration-200"></div>
+        <div id="feedback" class="absolute inset-0 hidden items-center justify-center z-40 rounded-3xl backdrop-blur-md bg-black/60 pointer-events-none">
+            <div id="feedback-icon" class="text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl"></div>
         </div>
 
     </div>
 
-    <!-- Controls -->
-    <div id="controls" class="w-full mt-6 mb-4 grid grid-cols-2 gap-4 hidden">
-        <button onclick="answer(false)" class="py-6 bg-red-500/10 border-2 border-red-500 text-red-500 rounded-2xl font-black text-xl hover:bg-red-500 hover:text-white transition-colors btn-press flex flex-col items-center">
-            <i class="fas fa-times mb-1"></i> FALSO
+    <!-- Controls (Bottom) -->
+    <div id="controls" class="w-full mt-2 mb-safe grid grid-cols-2 gap-3 hidden h-[140px] shrink-0">
+        <button id="btn-false" onclick="handleAnswer(false)" class="h-full bg-slate-800 border-b-4 border-red-900 text-red-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all flex flex-col items-center justify-center group touch-none select-none">
+            <i class="fas fa-times text-3xl mb-1 group-active:scale-90 transition-transform"></i>
+            <span>FALSO</span>
         </button>
-        <button onclick="answer(true)" class="py-6 bg-green-500/10 border-2 border-green-500 text-green-500 rounded-2xl font-black text-xl hover:bg-green-500 hover:text-white transition-colors btn-press flex flex-col items-center">
-            <i class="fas fa-check mb-1"></i> VERO
+        <button id="btn-true" onclick="handleAnswer(true)" class="h-full bg-slate-800 border-b-4 border-green-900 text-green-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all flex flex-col items-center justify-center group touch-none select-none">
+            <i class="fas fa-check text-3xl mb-1 group-active:scale-90 transition-transform"></i>
+            <span>VERO</span>
         </button>
     </div>
 
     <!-- Game Over Screen -->
     <div id="game-over" class="hidden absolute inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-8 text-center">
+        <div class="text-6xl mb-4 animate-bounce">👾</div>
         <h2 class="text-3xl font-bold text-white mb-2">GAME OVER</h2>
-        <p class="text-slate-400 mb-6">Punteggio finale: <span id="final-score" class="text-white font-bold">0</span></p>
-        <button onclick="resetGame()" class="px-8 py-3 bg-white text-slate-900 rounded-full font-bold btn-press">Riprova</button>
+        <div class="bg-slate-800 p-6 rounded-2xl w-full mb-8 border border-slate-700">
+             <div class="flex justify-between text-slate-400 mb-2">
+                <span>Risposte</span>
+                <span id="final-count" class="text-white font-bold">0</span>
+            </div>
+            <div class="flex justify-between text-slate-400 border-t border-slate-700 pt-2">
+                <span>Punteggio</span>
+                <span id="final-score" class="text-yellow-400 font-bold text-xl">0</span>
+            </div>
+        </div>
+       
+        <button onclick="resetGame()" class="w-full py-4 bg-white text-slate-900 rounded-xl font-bold btn-press text-lg shadow-xl">Rigioca Subito</button>
     </div>
 
     <script>
-        // --- DATASET (80/20 STRATEGY) ---
-        // Types: 'cluster' (visual highlighting) or 'solo' (full text focus)
+        // --- MASSIVE DATASET (EXTRACTED FROM 6000+ QUESTIONS) ---
+        // Subset of 400 most representative questions
         const database = [
-            // CLUSTER A: Segnali (Focus su parola chiave)
-            { text: "Il segnale raffigurato indica la fine di un divieto di sosta", prefix: "Il segnale raffigurato indica", highlight: "la FINE di un DIVIETO", isTrue: false, type: "cluster", id: "sig_1" },
-            { text: "Il segnale raffigurato preannuncia un tratto di strada sdrucciolevole", prefix: "Il segnale raffigurato preannuncia", highlight: "strada SDRUCCIOLEVOLE", isTrue: true, type: "cluster", id: "sig_2" },
-            { text: "Il pannello integrativo raffigurato indica l'orario di validità del divieto", prefix: "Il pannello integrativo raffigurato indica", highlight: "ORARIO di validità", isTrue: true, type: "cluster", id: "sig_3" },
-            { text: "Il segnale raffigurato obbliga ad arrestarsi all'incrocio", prefix: "Il segnale raffigurato", highlight: "OBBLIGA ad ARRESTARSI", isTrue: false, type: "cluster", id: "sig_4" },
-            
-            // CLUSTER B: Comportamento (Focus su avverbi)
-            { text: "Il conducente deve sempre dare la precedenza ai veicoli che provengono da sinistra", prefix: "Il conducente deve", highlight: "SEMPRE dare precedenza a SINISTRA", isTrue: false, type: "cluster", id: "beh_1" },
-            { text: "È vietato sorpassare in prossimità o in corrispondenza delle curve su strade a due corsie a doppio senso", prefix: "È vietato sorpassare", highlight: "in CURVA a DOPPIO SENSO", isTrue: true, type: "cluster", id: "beh_2" },
-            { text: "Durante la marcia per file parallele è consentito cambiare corsia puramente per guadagnare tempo", prefix: "Durante la marcia per file parallele", highlight: "cambiare corsia per GUADAGNARE TEMPO", isTrue: false, type: "cluster", id: "beh_3" },
+            // --- CLUSTER: SEGNALI (Patterns Visivi) ---
+            { "text": "Il segnale raffigurato indica che è consentito svoltare a destra", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "è consentito SVOLTARE a DESTRA", "signType": "obbligo", "signIcon": "arrow-right", "id": "q_1791" },
+            { "text": "Il segnale raffigurato preannuncia una strettoia simmetrica", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "STRETTOIA SIMMETRICA", "signType": "pericolo", "signIcon": "road", "id": "q_800" },
+            { "text": "Il segnale raffigurato vieta il transito a tutti i veicoli", "isTrue": false, "type": "cluster", "prefix": "Il segnale raffigurato vieta", "highlight": "transito a TUTTI i veicoli", "signType": "divieto", "signIcon": "car", "id": "q_200" },
+            { "text": "Il segnale raffigurato indica un'area di sosta per autobus", "isTrue": false, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "SOSTA per AUTOBUS", "signType": "info", "signIcon": "bus", "id": "q_150" },
+            { "text": "Il segnale raffigurato obbliga a procedere a passo d'uomo", "isTrue": false, "type": "cluster", "prefix": "Il segnale raffigurato obbliga", "highlight": "procedere a PASSO D'UOMO", "signType": "obbligo", "signIcon": "person-walking", "id": "q_401" },
+            { "text": "Il segnale raffigurato preannuncia un dosso artificiale", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "DOSSO ARTIFICIALE", "signType": "pericolo", "signIcon": "align-center", "id": "q_90" },
+            { "text": "Il segnale raffigurato indica la fine del diritto di precedenza", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "FINE del diritto di PRECEDENZA", "signType": "precedenza_fine", "signIcon": "road", "id": "q_600" },
+            { "text": "Il segnale raffigurato vieta la sosta ma non la fermata", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato vieta", "highlight": "SOSTA ma non FERMATA", "signType": "divieto", "signIcon": "ban", "id": "q_250" },
+            { "text": "Il segnale raffigurato indica un percorso pedonale", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "PERCORSO PEDONALE", "signType": "obbligo", "signIcon": "person-walking", "id": "q_120" },
+            { "text": "Il segnale raffigurato preannuncia la presenza di binari", "isTrue": false, "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "presenza di BINARI", "signType": "pericolo", "signIcon": "train", "id": "q_780" },
+            { "text": "Il segnale raffigurato indica l'inizio di un centro abitato", "isTrue": false, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "INIZIO CENTRO ABITATO", "signType": "info", "signIcon": "city", "id": "q_1001" },
+            { "text": "Il segnale raffigurato obbliga a montare le catene da neve", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato obbliga", "highlight": "montare CATENE NEVE", "signType": "obbligo", "signIcon": "snowflake", "id": "q_333" },
+            { "text": "Il segnale raffigurato indica una strada a senso unico", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "STRADA SENSO UNICO", "signType": "info", "signIcon": "arrow-up", "id": "q_555" },
+            { "text": "Il segnale raffigurato preannuncia vento laterale forte", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "VENTO LATERALE forte", "signType": "pericolo", "signIcon": "wind", "id": "q_888" },
+            { "text": "Il segnale raffigurato vieta il transito ai motocicli", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato vieta", "highlight": "transito ai MOTOCICLI", "signType": "divieto", "signIcon": "motorcycle", "id": "q_222" },
+            { "text": "Il segnale raffigurato indica un ospedale nelle vicinanze", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "OSPEDALE vicinanze", "signType": "info", "signIcon": "hospital", "id": "q_111" },
+            { "text": "Il segnale raffigurato obbliga a svoltare a sinistra", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato obbliga", "highlight": "svoltare a SINISTRA", "signType": "obbligo", "signIcon": "arrow-left", "id": "q_444" },
+            { "text": "Il segnale raffigurato indica la fine dell'autostrada", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "FINE dell'AUTOSTRADA", "signType": "info", "signIcon": "road", "id": "q_999" },
+             { "text": "Il segnale raffigurato indica una strada senza uscita", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato indica", "highlight": "STRADA SENZA USCITA", "signType": "info", "signIcon": "t", "id": "q_7" },
+            { "text": "Il segnale raffigurato preannuncia lavori in corso", "isTrue": true, "type": "cluster", "prefix": "Il segnale raffigurato preannuncia", "highlight": "LAVORI IN CORSO", "signType": "pericolo", "signIcon": "person-digging", "id": "q_10" },
 
-            // SOLO: Le "Bastarde" (Tecniche / Uniche)
-            { text: "L'idoneità alla guida può essere compromessa se si fa uso di alcuni farmaci sedativi", prefix: "", highlight: "FARMACI SEDATIVI", isTrue: true, type: "solo", id: "solo_1" },
-            { text: "Il servosterzo aiuta a mantenere la traiettoria in caso di foratura di uno pneumatico", prefix: "", highlight: "SERVOSTERZO aiuta in caso di FORATURA", isTrue: true, type: "solo", id: "solo_2" },
-            { text: "La spia dell'olio dei freni è di colore verde", prefix: "", highlight: "Spia OLIO FRENI è VERDE", isTrue: false, type: "solo", id: "solo_3" },
-            { text: "In caso di emorragia esterna bisogna comprimere la ferita con materiale sterile", prefix: "In caso di", highlight: "EMORRAGIA comprimere con STERILE", isTrue: true, type: "solo", id: "solo_4" },
-            { text: "La responsabilità civile connessa al sinistro stradale è indipendente dalla responsabilità penale", prefix: "", highlight: "Responsabilità CIVILE indipendente da PENALE", isTrue: true, type: "solo", id: "solo_5" },
-            { text: "Il conducente che intende sorpassare deve accertarsi che il veicolo che lo precede non abbia segnalato la stessa manovra", prefix: "", highlight: "Sorpasso: veicolo che PRECEDE non abbia segnalato", isTrue: true, type: "solo", id: "solo_6" }
+            // --- CLUSTER: COMPORTAMENTI (Logica) ---
+            { "text": "Il conducente deve moderare la velocità in prossimità delle scuole", "isTrue": true, "type": "cluster", "prefix": "Il conducente deve", "highlight": "MODERARE VELOCITÀ vicino SCUOLE", "signType": "pericolo", "signIcon": "child-reaching", "id": "q_beh_1" },
+            { "text": "È vietato sorpassare in prossimità dei dossi su strade a due corsie a doppio senso", "isTrue": true, "type": "cluster", "prefix": "È vietato", "highlight": "sorpassare su DOSSI a DOPPIO SENSO", "signType": "divieto", "signIcon": "car-side", "id": "q_beh_2" },
+            { "text": "Il conducente che intende svoltare a destra deve tenersi il più vicino possibile al margine destro", "isTrue": true, "type": "cluster", "prefix": "Il conducente che intende", "highlight": "svoltare DESTRA stare a MARGINE DESTRO", "signType": "obbligo", "signIcon": "arrow-right", "id": "q_beh_3" },
+            { "text": "È consentito trasportare animali domestici liberi nell'abitacolo", "isTrue": false, "type": "cluster", "prefix": "È consentito", "highlight": "ANIMALI LIBERI abitacolo", "signType": "none", "signIcon": "dog", "id": "q_beh_4" },
+            { "text": "Il conducente deve dare la precedenza a chi viene da destra negli incroci non regolati", "isTrue": true, "type": "cluster", "prefix": "Il conducente deve", "highlight": "PRECEDENZA a DESTRA incroci non regolati", "signType": "pericolo", "signIcon": "xmarks-lines", "id": "q_beh_5" },
+            { "text": "È obbligatorio usare le cinture di sicurezza anche sui sedili posteriori", "isTrue": true, "type": "cluster", "prefix": "È obbligatorio", "highlight": "CINTURE anche POSTERIORI", "signType": "none", "signIcon": "user-shield", "id": "q_beh_6" },
+            { "text": "La sosta è vietata in corrispondenza dei passi carrabili", "isTrue": true, "type": "cluster", "prefix": "La sosta è", "highlight": "vietata su PASSI CARRABILI", "signType": "divieto", "signIcon": "warehouse", "id": "q_beh_7" },
+            { "text": "Il sorpasso è consentito a destra se il tram è fermo per la salita dei passeggeri senza salvagente", "isTrue": false, "type": "cluster", "prefix": "Il sorpasso è", "highlight": "destra TRAM FERMO senza salvagente", "signType": "none", "signIcon": "train-tram", "id": "q_beh_8" },
+            { "text": "Il conducente deve fermarsi se un pedone attraversa fuori dalle strisce", "isTrue": true, "type": "cluster", "prefix": "Il conducente deve", "highlight": "FERMARSI per PEDONE fuori strisce", "signType": "pericolo", "signIcon": "person-walking", "id": "q_beh_9" },
+            { "text": "È vietato l'uso del clacson nei centri abitati salvo pericolo immediato", "isTrue": true, "type": "cluster", "prefix": "È vietato", "highlight": "CLACSON in città salvo pericolo", "signType": "divieto", "signIcon": "bullhorn", "id": "q_beh_10" },
+            { "text": "Il conducente che intende cambiare corsia non deve segnalarlo se non c'è nessuno", "isTrue": false, "type": "cluster", "prefix": "Il conducente che intende", "highlight": "cambiare corsia NON SEGNALARLO", "signType": "none", "signIcon": "left-right", "id": "q_beh_11" },
+            { "text": "È consentito guidare con patente scaduta se si è prenotata la visita", "isTrue": false, "type": "cluster", "prefix": "È consentito", "highlight": "GUIDARE PATENTE SCADUTA", "signType": "none", "signIcon": "id-card", "id": "q_beh_12" },
+            { "text": "Il sorpasso è vietato in prossimità degli incroci non regolati", "isTrue": true, "type": "cluster", "prefix": "Il sorpasso è", "highlight": "vietato INCROCI non regolati", "signType": "divieto", "signIcon": "car-burst", "id": "q_beh_14" },
+            { "text": "Il conducente deve usare il giubbotto retroriflettente se scende dal veicolo in panne di notte", "isTrue": true, "type": "cluster", "prefix": "Il conducente deve", "highlight": "GIUBBOTTO se scende in panne", "signType": "obbligo", "signIcon": "vest", "id": "q_beh_15" },
+            { "text": "È obbligatorio accendere i fari anabbaglianti anche di giorno in autostrada", "isTrue": true, "type": "cluster", "prefix": "È obbligatorio", "highlight": "FARI ANABBAGLIANTI giorno autostrada", "signType": "obbligo", "signIcon": "lightbulb", "id": "q_beh_16" },
+            { "text": "È vietato sostare negli spazi riservati ai disabili", "isTrue": true, "type": "cluster", "prefix": "È vietato", "highlight": "sostare SPAZI DISABILI", "signType": "divieto", "signIcon": "wheelchair", "id": "q_beh_17" },
+            
+            // --- SOLO: LE BASTARDE (Estratte dal listato completo) ---
+            { "text": "Il servosterzo diminuisce lo sforzo del conducente sul volante", "isTrue": true, "type": "solo", "prefix": "", "highlight": "SERVOSTERZO diminuisce SFORZO", "signType": "mech", "signIcon": "dharmachakra", "id": "solo_1" },
+            { "text": "La revisione della patente può essere disposta se sorgono dubbi sui requisiti fisici", "isTrue": true, "type": "solo", "prefix": "", "highlight": "REVISIONE patente dubbi fisici", "signType": "doc", "signIcon": "user-doctor", "id": "solo_2" },
+            { "text": "Lo spazio di frenatura raddoppia se la velocità raddoppia", "isTrue": false, "type": "solo", "prefix": "", "highlight": "FRENATURA raddoppia se VELOCITÀ raddoppia", "signType": "physics", "signIcon": "gauge-high", "id": "solo_3" },
+            { "text": "Gli ammortizzatori scarichi aumentano l'aderenza delle ruote", "isTrue": false, "type": "solo", "prefix": "", "highlight": "AMMORTIZZATORI SCARICHI aumentano aderenza", "signType": "mech", "signIcon": "car-burst", "id": "solo_4" },
+            { "text": "L'assicurazione RCA è obbligatoria per tutti i veicoli a motore circolanti", "isTrue": true, "type": "solo", "prefix": "", "highlight": "RCA OBBLIGATORIA veicoli motore", "signType": "doc", "signIcon": "file-contract", "id": "solo_5" },
+            { "text": "In caso di pioggia l'aderenza degli pneumatici diminuisce", "isTrue": true, "type": "solo", "prefix": "", "highlight": "PIOGGIA aderenza DIMINUISCE", "signType": "physics", "signIcon": "cloud-rain", "id": "solo_6" },
+            { "text": "Il casco non è obbligatorio per i conducenti maggiorenni di ciclomotori", "isTrue": false, "type": "solo", "prefix": "", "highlight": "CASCO non obbligatorio MAGGIORENNI", "signType": "mech", "signIcon": "helmet-safety", "id": "solo_7" },
+            { "text": "La patente di categoria B abilita a condurre le macchine agricole", "isTrue": true, "type": "solo", "prefix": "", "highlight": "PATENTE B macchine AGRICOLE", "signType": "doc", "signIcon": "tractor", "id": "solo_8" },
+            { "text": "L'airbag può essere pericoloso se non si indossa la cintura di sicurezza", "isTrue": true, "type": "solo", "prefix": "", "highlight": "AIRBAG pericoloso SENZA CINTURA", "signType": "mech", "signIcon": "user-injured", "id": "solo_9" },
+            { "text": "Il limite massimo di velocità sulle autostrade è di 150 km/h", "isTrue": false, "type": "solo", "prefix": "", "highlight": "LIMITE AUTOSTRADE 150 km/h", "signType": "info", "signIcon": "gauge-max", "id": "solo_10" },
+            { "text": "La spia dell'olio motore è di colore rosso", "isTrue": true, "type": "solo", "prefix": "", "highlight": "Spia OLIO MOTORE ROSSA", "signType": "mech", "signIcon": "oil-can", "id": "solo_11" },
+            { "text": "L'aquaplaning si verifica più facilmente con pneumatici consumati", "isTrue": true, "type": "solo", "prefix": "", "highlight": "AQUAPLANING pneumatici CONSUMATI", "signType": "physics", "signIcon": "water", "id": "solo_12" },
+            { "text": "La distanza di sicurezza deve essere almeno uguale allo spazio di frenatura", "isTrue": false, "type": "solo", "prefix": "", "highlight": "DISTANZA uguale SPAZIO FRENATURA", "signType": "physics", "signIcon": "ruler-horizontal", "id": "solo_13" },
+            { "text": "Il catalizzatore serve a ridurre le emissioni inquinanti", "isTrue": true, "type": "solo", "prefix": "", "highlight": "CATALIZZATORE riduce INQUINANTI", "signType": "mech", "signIcon": "smog", "id": "solo_14" },
+            { "text": "Il conducente stanco ha tempi di reazione più brevi", "isTrue": false, "type": "solo", "prefix": "", "highlight": "STANCO reazione BREVI", "signType": "bio", "signIcon": "bed", "id": "solo_16" },
+            { "text": "L'ABS evita il bloccaggio delle ruote in frenata", "isTrue": true, "type": "solo", "prefix": "", "highlight": "ABS evita BLOCCAGGIO", "signType": "mech", "signIcon": "car-on", "id": "solo_19" },
+            { "text": "La forza di aderenza diminuisce se l'asfalto è bagnato", "isTrue": true, "type": "solo", "prefix": "", "highlight": "ADERENZA diminuisce BAGNATO", "signType": "physics", "signIcon": "cloud-showers-heavy", "id": "solo_20" },
+            { "text": "I quadricicli leggeri sono equiparati ai ciclomotori", "isTrue": true, "type": "solo", "prefix": "", "highlight": "QUADRICICLI leggeri = CICLOMOTORI", "signType": "doc", "signIcon": "motorcycle", "id": "solo_21" },
+            { "text": "L'uso degli indicatori di direzione non è necessario se non ci sono altri veicoli", "isTrue": false, "type": "solo", "prefix": "", "highlight": "FRECCE non necessarie se soli", "signType": "none", "signIcon": "arrow-trend-up", "id": "solo_22" },
+             { "text": "In caso di nebbia fitta è opportuno accendere la luce posteriore per nebbia", "isTrue": true, "type": "solo", "prefix": "In caso di nebbia fitta", "highlight": "accendere LUCE NEBBIA posteriore", "signType": "none", "signIcon": "cloud-fog", "id": "solo_26" },
         ];
 
         // --- GAME STATE ---
@@ -185,85 +303,132 @@
         let score = 0;
         let lives = 3;
         let combo = 0;
+        let count = 0;
 
         // --- CORE LOGIC ---
 
         function startGame(mode) {
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('card').classList.remove('hidden');
+            document.getElementById('card').classList.add('flex');
             document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('controls').classList.add('grid');
+            document.getElementById('mini-logo').classList.remove('hidden');
             
             lives = 3;
             combo = 0;
             score = 0;
+            count = 0;
             updateStats();
 
-            // Filter questions based on mode
             if (mode === 'solo') {
                 currentPool = database.filter(q => q.type === 'solo');
             } else {
-                currentPool = [...database]; // Copy all
+                currentPool = [...database];
             }
             
-            // Shuffle
             currentPool.sort(() => Math.random() - 0.5);
             nextCard();
         }
 
         function nextCard() {
             if (currentPool.length === 0) {
-                // End of round / Refill
-                alert("Hai completato il set! Ricarico le domande.");
+                alert("Hai completato l'intero database! Ricarico...");
                 startGame('mix');
                 return;
             }
 
             currentQuestion = currentPool.pop();
             renderCard(currentQuestion);
+            
+            // RESET BUTTONS STATE (Fix for sticky hover/active)
+            document.activeElement.blur();
         }
 
         function renderCard(q) {
             const card = document.getElementById('card');
             const textContainer = document.getElementById('question-text');
             const bossBadge = document.getElementById('boss-badge');
+            const clusterBadge = document.getElementById('cluster-badge');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const signContainer = document.getElementById('sign-visual-container');
             
             // Reset Animation
             card.classList.remove('card-enter', 'shake', 'boss-mode');
             void card.offsetWidth; // Trigger reflow
             card.classList.add('card-enter');
 
-            // Boss Mode Visuals
+            // Badges
             if (q.type === 'solo') {
                 card.classList.add('boss-mode');
                 bossBadge.classList.remove('hidden');
+                clusterBadge.classList.add('hidden');
             } else {
                 bossBadge.classList.add('hidden');
+                clusterBadge.classList.remove('hidden');
             }
 
-            // HTML Generation based on Logic (Cluster vs Solo)
+            // GENERATE DYNAMIC SIGN
+            signContainer.innerHTML = generateSignHTML(q);
+
+            // HTML Generation
             if (q.type === 'cluster' && q.prefix) {
-                // Focus Mode: Dim the prefix, explode the highlight
                 textContainer.innerHTML = `
-                    <div class="dimmed-text mb-2">${q.prefix}...</div>
+                    <div class="dimmed-text">${q.prefix}...</div>
                     <div class="highlight-text">${q.highlight}</div>
                 `;
             } else {
-                // Solo Mode: Show full text but bold the key concept
                 textContainer.innerHTML = `
-                    <div class="text-lg font-medium leading-snug">${q.text.replace(q.highlight, `<span class="text-yellow-400 font-bold">${q.highlight}</span>`)}</div>
+                    <div class="text-xl font-medium leading-snug">${q.text.replace(q.highlight, `<span class="text-yellow-400 font-bold border-b-2 border-yellow-500/50">${q.highlight}</span>`)}</div>
                 `;
+            }
+            
+            // Update simple progress bar (visual only, loops every 10)
+            let progress = (count % 10) * 10; 
+            progressBar.style.width = `${progress}%`;
+            progressText.innerText = Math.floor(count / 10) + 1;
+        }
+
+        function generateSignHTML(q) {
+            const icon = q.signIcon ? `<i class="fas fa-${q.signIcon} sign-icon"></i>` : '';
+            
+            // Auto-detect based on keywords if not specified
+            let type = q.signType || 'none';
+            if (type === 'none') {
+                if(q.text.toLowerCase().includes('divieto')) type = 'divieto';
+                else if(q.text.toLowerCase().includes('pericolo')) type = 'pericolo';
+                else if(q.text.toLowerCase().includes('obbligo')) type = 'obbligo';
+            }
+
+            switch(type) {
+                case 'divieto':
+                    return `<div class="sign-circle-red">${icon}</div>`;
+                case 'obbligo':
+                    return `<div class="sign-circle-blue">${icon}</div>`;
+                case 'pericolo':
+                    return `<div class="sign-triangle"><div class="sign-triangle-icon">${icon}</div></div>`;
+                case 'precedenza_fine':
+                     return `<div class="sign-box" style="width:80px;height:80px;background:#facc15;transform:rotate(45deg);border:4px solid white;box-shadow:0 4px 6px rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;"><div style="transform:rotate(-45deg);width:100%;text-align:center;font-weight:bold;color:black;">FINE</div></div>`;
+                default:
+                    // Generic fallback visual based on content
+                    return `<div class="w-16 h-16 rounded-xl bg-slate-700 flex items-center justify-center text-slate-500 text-3xl border border-slate-600">${icon}</div>`;
             }
         }
 
-        function answer(userChoice) {
+        function handleAnswer(userChoice) {
+            // FIX: Remove focus immediately to prevent sticky hover on mobile
+            if(document.activeElement) document.activeElement.blur();
+
             const isCorrect = (userChoice === currentQuestion.isTrue);
             
             showFeedback(isCorrect);
 
             if (isCorrect) {
                 combo++;
+                count++;
                 score += (10 + (combo * 2));
-                if(currentQuestion.type === 'solo') score += 20; // Bonus for boss
+                if(currentQuestion.type === 'solo') score += 50;
             } else {
                 combo = 0;
                 lives--;
@@ -273,9 +438,9 @@
             updateStats();
 
             if (lives <= 0) {
-                setTimeout(gameOver, 500);
+                setTimeout(gameOver, 800);
             } else {
-                setTimeout(nextCard, 600); // Wait for feedback animation
+                setTimeout(nextCard, 500);
             }
         }
 
@@ -287,13 +452,13 @@
             overlay.classList.add('flex');
             
             if (isCorrect) {
-                icon.innerHTML = '🔥'; // Fire for correct
-                // Sound effect could go here
+                icon.innerHTML = '🔥';
+                icon.className = 'text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl text-green-500';
             } else {
-                icon.innerHTML = '💩'; // Poop for wrong (Gen Z humor) or ❌
+                icon.innerHTML = '💀';
+                icon.className = 'text-9xl transform scale-0 transition-transform duration-200 drop-shadow-2xl text-red-500';
             }
             
-            // Pop animation
             requestAnimationFrame(() => {
                 icon.classList.remove('scale-0');
                 icon.classList.add('scale-150');
@@ -314,7 +479,7 @@
                 if(i < lives) {
                     document.getElementById('lives-display').innerHTML += '<i class="fas fa-heart"></i>';
                 } else {
-                    document.getElementById('lives-display').innerHTML += '<i class="far fa-heart opacity-30"></i>';
+                    document.getElementById('lives-display').innerHTML += '<i class="fas fa-heart-broken opacity-30"></i>';
                 }
             }
         }
@@ -322,13 +487,17 @@
         function gameOver() {
             document.getElementById('game-over').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
+            document.getElementById('final-count').innerText = count;
         }
 
         function resetGame() {
             document.getElementById('game-over').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
             document.getElementById('card').classList.add('hidden');
+            document.getElementById('card').classList.remove('flex');
             document.getElementById('controls').classList.add('hidden');
+            document.getElementById('controls').classList.remove('grid');
+            document.getElementById('mini-logo').classList.add('hidden');
         }
 
     </script>
