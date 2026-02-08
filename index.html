@@ -11,149 +11,188 @@
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* Scrollbar Custom */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        /* App Sections */
+        .app-section { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .app-section.active { display: flex; }
 
-        /* Quiz Item Styling */
-        .quiz-item { 
-            border-bottom: 1px solid #1e293b; 
-            transition: all 0.15s ease-in-out;
-            padding: 12px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        .quiz-item:hover { background-color: #1e293b; transform: translateX(2px); }
+        /* Menu Card */
+        .menu-card { transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: pointer; position: relative; overflow: hidden; }
+        .menu-card:active { transform: scale(0.96); }
+
+        /* Quiz Hacker Styles */
+        .highlight-text { color: #ffffff; font-weight: 900; line-height: 1.3; text-shadow: 0 0 20px rgba(59, 130, 246, 0.4); font-size: 1.25rem; display: block; margin: 0.5rem 0; }
+        .dimmed-text { opacity: 0.5; font-size: 0.9rem; }
+        .prefix-text { color: #94a3b8; font-size: 0.9rem; margin-bottom: 4px; display: block; }
         
-        /* Badges & Tags */
-        .verdict { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-weight: 900; 
-            font-size: 1.1rem; 
-            min-width: 28px; 
-            text-align: center;
-            padding-top: 2px;
-        }
-        .v-true { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.2); }
-        .v-false { color: #f87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.2); }
+        /* Code Breaker Styles */
+        .breaker-font { font-family: 'JetBrains Mono', monospace; color: #00ff41; background-color: #050505; }
+        .slot { border-bottom: 2px solid #333; width: 28px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; margin: 2px; }
+        .slot.filled { color: white; border-color: white; }
+        .slot.correct { color: #00ff41; border-color: #00ff41; background: rgba(0, 255, 65, 0.1); }
+        .key-btn { background: #111; border: 1px solid #333; color: white; border-radius: 6px; font-weight: bold; padding: 10px 0; touch-action: manipulation; }
+        .key-btn:active { transform: translateY(2px); }
 
-        .category-badge {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 3px 8px;
-            border-radius: 99px;
-            font-weight: 700;
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .hl-text { color: white; font-weight: 600; }
-        .prefix-text { color: #94a3b8; font-size: 0.9em; }
+        /* Icons & Visuals */
+        .category-icon { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 12px; font-size: 24px; margin-bottom: 10px; }
+        .icon-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+        .icon-prohibition { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 2px solid #ef4444; border-radius: 50%; }
+        .icon-obligation { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 2px solid #3b82f6; border-radius: 50%; }
+        .icon-theory { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
 
-        /* Icons for Categories (CSS Only Fallback) */
-        .icon-box {
-            width: 24px; height: 24px;
-            display: flex; justify-content: center; align-items: center;
-            border-radius: 6px;
-            font-size: 12px;
-        }
-
+        /* Animations */
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .card-enter { animation: slideIn 0.3s ease-out; }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
 <body>
 
-    <!-- HEADER -->
-    <header class="bg-slate-900 border-b border-slate-700 p-4 shrink-0 z-20 shadow-lg relative">
-        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            
-            <!-- Logo Area -->
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <i class="fas fa-book-open text-white text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-tight text-white leading-none">TRAFFIC<span class="text-blue-500">MASTER</span></h1>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1">Database Ufficiale 2026</p>
-                </div>
-            </div>
+    <!-- 1. MAIN MENU -->
+    <div id="main-menu" class="app-section active p-6 items-center justify-center bg-slate-900 relative">
+        <div class="text-center mb-10 z-10">
+            <h1 class="text-4xl font-black mb-2 tracking-tighter text-white">TRAFFIC<span class="text-blue-500">MASTER</span></h1>
+            <p class="text-slate-400 text-xs uppercase tracking-widest font-bold">Listato Ufficiale 2026</p>
+            <div class="mt-2 text-[10px] text-slate-500" id="total-count-display">Caricamento DB...</div>
+        </div>
 
-            <!-- Stats & Search -->
-            <div class="flex-1 w-full md:w-auto flex flex-col sm:flex-row gap-3 justify-end items-center">
-                
-                <div class="bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 flex items-center gap-3 w-full sm:w-auto">
-                    <div class="text-right">
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">Totale Quiz</div>
-                        <div class="text-lg font-mono font-bold text-white leading-none" id="total-count">0</div>
+        <div class="w-full max-w-sm space-y-5 z-10">
+            <!-- Quiz Hacker Btn -->
+            <div onclick="switchApp('hacker')" class="menu-card bg-slate-800 rounded-3xl p-6 border-2 border-slate-700 hover:border-blue-500 group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fas fa-bolt text-8xl text-blue-500"></i>
+                </div>
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="bg-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-eye"></i>
                     </div>
-                    <div class="h-8 w-[1px] bg-slate-700"></div>
-                    <div class="text-right">
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">Filtrati</div>
-                        <div class="text-lg font-mono font-bold text-blue-400 leading-none" id="filtered-count">0</div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Quiz Hacker</h2>
+                        <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Rapid Fire</span>
                     </div>
                 </div>
+                <p class="text-slate-400 text-sm leading-snug">Allena i riflessi. Vero o Falso istantaneo sulle domande ufficiali.</p>
+            </div>
 
-                <div class="relative w-full sm:w-64">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                    <input type="text" id="search-input" placeholder="Cerca (es. nebbia, casco)..." 
-                           class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600">
+            <!-- Code Breaker Btn -->
+            <div onclick="switchApp('breaker')" class="menu-card bg-black rounded-3xl p-6 border-2 border-green-900 hover:border-green-500 group shadow-lg shadow-green-900/20">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fas fa-terminal text-8xl text-green-500"></i>
                 </div>
-            </div>
-        </div>
-
-        <!-- CATEGORY TABS -->
-        <div class="max-w-5xl mx-auto mt-4 overflow-x-auto pb-1 no-scrollbar">
-            <div class="flex gap-2" id="category-filters">
-                <button onclick="filterByTopic('all')" class="cat-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white border border-blue-500 transition-all whitespace-nowrap" id="btn-all">
-                    TUTTI
-                </button>
-                <!-- Dynamic Categories will be injected here -->
-            </div>
-        </div>
-    </header>
-
-    <!-- CONTENT AREA -->
-    <div id="app-content" class="max-w-5xl mx-auto w-full relative flex-1 overflow-hidden bg-slate-900/50">
-        
-        <!-- LOADING STATE -->
-        <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-50">
-            <div class="relative">
-                <div class="w-16 h-16 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <i class="fas fa-database text-slate-600 text-xl"></i>
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="bg-green-600 w-12 h-12 rounded-2xl flex items-center justify-center text-black text-xl shadow-lg shadow-green-500/30">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-green-400" style="font-family: 'JetBrains Mono'">Code Breaker</h2>
+                        <span class="text-[10px] font-bold text-green-600 uppercase tracking-widest font-mono">Decrypt</span>
+                    </div>
                 </div>
+                <p class="text-slate-500 text-sm leading-snug font-mono">Completa le parole mancanti nelle frasi del codice della strada.</p>
             </div>
-            <p class="text-slate-400 text-sm font-bold mt-4 animate-pulse">Caricamento Listato 2026...</p>
         </div>
-
-        <!-- EMPTY STATE -->
-        <div id="empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-500">
-            <i class="fas fa-filter text-4xl mb-3 opacity-50"></i>
-            <p class="text-sm">Nessun quiz trovato con questi criteri.</p>
-        </div>
-
-        <!-- LIST CONTAINER -->
-        <div id="list-view" class="h-full w-full overflow-y-auto pb-20">
-            <!-- Items injected by JS -->
-        </div>
-
-        <!-- INFINITE SCROLL TRIGGER -->
-        <div id="sentinel" class="h-4 w-full"></div>
-
     </div>
 
+    <!-- 2. QUIZ HACKER APP -->
+    <div id="app-hacker" class="app-section p-4 max-w-md mx-auto relative bg-slate-900">
+        <!-- Header -->
+        <div class="w-full flex justify-between items-center h-[60px]">
+            <button onclick="switchApp('menu')" class="text-slate-400 hover:text-white px-3 py-2 bg-slate-800 rounded-xl text-xs font-bold border border-slate-700">
+                <i class="fas fa-arrow-left mr-1"></i> MENU
+            </button>
+            <div class="flex gap-1 text-red-500 text-lg" id="qh-lives">
+                <i class="fas fa-heart"></i><i class="fas fa-heart"></i><i class="fas fa-heart"></i>
+            </div>
+        </div>
+
+        <!-- Card -->
+        <div class="flex-1 flex flex-col justify-center relative">
+            <div id="qh-card" class="bg-slate-800 w-full rounded-3xl p-6 shadow-2xl border-t border-slate-700 flex flex-col items-center justify-between min-h-[400px]">
+                
+                <div class="w-full flex justify-between items-start mb-4">
+                    <div id="qh-topic" class="text-[10px] font-bold uppercase tracking-widest text-blue-400 bg-blue-400/10 px-2 py-1 rounded">ARGOMENTO</div>
+                </div>
+
+                <!-- Visual Icon (Category Based) -->
+                <div id="qh-icon" class="category-icon icon-theory">
+                    <i class="fas fa-book"></i>
+                </div>
+
+                <!-- Question Text -->
+                <div id="qh-text-container" class="text-center w-full break-words flex-1 flex flex-col justify-center my-4">
+                    <!-- Text injected via JS -->
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-1 font-bold uppercase">
+                        <span>Score: <span id="qh-score" class="text-white">0</span></span>
+                        <span>Streak: <span id="qh-streak" class="text-yellow-400">0</span></span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="qh-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Overlay -->
+            <div id="qh-feedback" class="absolute inset-0 hidden items-center justify-center z-50 rounded-3xl backdrop-blur-sm bg-black/50 pointer-events-none">
+                <div id="qh-feedback-icon" class="text-8xl transform scale-0 transition-transform duration-200 drop-shadow-2xl"></div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="w-full mt-4 grid grid-cols-2 gap-4 h-[100px]">
+            <button onclick="qh_answer(false)" class="bg-slate-800 border-b-4 border-red-900 text-red-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all hover:bg-slate-750">FALSO</button>
+            <button onclick="qh_answer(true)" class="bg-slate-800 border-b-4 border-green-900 text-green-500 rounded-2xl font-black text-2xl active:border-b-0 active:translate-y-1 transition-all hover:bg-slate-750">VERO</button>
+        </div>
+    </div>
+
+    <!-- 3. CODE BREAKER APP -->
+    <div id="app-breaker" class="app-section breaker-font flex-col p-4 max-w-md mx-auto relative bg-black">
+        <!-- Header -->
+        <div class="flex justify-between items-center h-[50px] mb-2">
+            <button onclick="switchApp('menu')" class="text-green-700 hover:text-green-500 px-3 py-1 border border-green-900 rounded text-xs font-bold">
+                ESC
+            </button>
+            <div class="text-xs text-green-800 font-bold">LIVELLO <span id="cb-lvl" class="text-green-500">1</span></div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="flex-1 flex flex-col relative">
+            <div class="flex-1 flex flex-col justify-center items-center text-center">
+                
+                <div id="cb-topic" class="text-[10px] text-green-800 border border-green-900 px-2 py-1 rounded mb-6 uppercase tracking-widest">TOPIC</div>
+                
+                <div id="cb-question-text" class="text-slate-400 text-sm md:text-base leading-relaxed mb-6 font-sans">
+                    <!-- Injected JS -->
+                </div>
+
+                <div id="cb-slots" class="flex flex-wrap justify-center gap-1 mb-8">
+                    <!-- Slots injected JS -->
+                </div>
+            </div>
+
+            <!-- Keyboard -->
+            <div class="w-full pb-4">
+                <div class="text-center text-[10px] text-green-900 mb-2 uppercase tracking-widest font-bold">Decripta la parola mancante</div>
+                <div id="cb-keys" class="grid grid-cols-7 gap-1">
+                    <!-- Keys injected JS -->
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button onclick="cb_delete()" class="flex-1 py-3 bg-slate-900 rounded border border-slate-800 text-red-500 active:bg-slate-800 font-bold"><i class="fas fa-backspace"></i></button>
+                    <button onclick="cb_check()" class="flex-[2] py-3 bg-green-900/20 text-green-400 border border-green-600 rounded font-bold hover:bg-green-900/40 active:scale-95 transition-all">ENTER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGICA JAVASCRIPT -->
     <script>
-        // --- 1. PARSER & DATABASE ENGINE ---
-        
-        // Raw Data from the file provided by user (Simulated parsing of the attached file structure)
-        // I am embedding the parsing logic directly here to process the raw string content.
-        
-        const rawFileContent = `
+        // --- 1. PARSER DEL FILE ALLEGATO ---
+        // Simulo il caricamento del file testuale. In produzione questo stringa verrebbe dal file reale.
+        // Qui inserisco un campione significativo basato sulla struttura del file "Analisi Listato A B 2026"
+        const rawData = `
 Lezione: 01.1 Definizioni stradali e di traffico
 Argomento: La strada
 La strada è...
@@ -243,210 +282,291 @@ La patente B...
 [ F ] ...abilita a guidare gli autobus
 `;
 
-        // Database Storage
-        let fullDatabase = [];
-        let filteredDatabase = [];
-        let topics = new Set();
+        // --- DATABASE STORAGE ---
+        let fullDB = [];
+        let breakerDB = []; // Per il gioco "Code Breaker"
 
-        // 2. PARSING LOGIC
-        function parseContent(content) {
-            const lines = content.split('\n');
-            let currentTopic = "Generale";
-            let currentPrefix = "";
-            let db = [];
+        function parseData() {
+            const lines = rawData.split('\n');
+            let topic = "Generale";
+            let prefix = "";
+            let newDB = [];
+            let newBreaker = [];
 
             lines.forEach(line => {
                 line = line.trim();
                 if (!line) return;
-
-                // Detect Topic
+                
+                // Detection
                 if (line.startsWith("Argomento:")) {
-                    currentTopic = line.replace("Argomento:", "").trim();
-                    topics.add(currentTopic);
+                    topic = line.replace("Argomento:", "").trim();
                     return;
                 }
-                if (line.startsWith("Lezione:")) return; // Skip Lesson headers
+                if (line.startsWith("Lezione:")) return;
 
-                // Detect Answers
                 if (line.startsWith("[ V ]") || line.startsWith("[ F ]")) {
                     const isTrue = line.startsWith("[ V ]");
                     let suffix = line.substring(5).trim();
-                    
-                    // Clean leading dots
                     if (suffix.startsWith("...")) suffix = suffix.substring(3).trim();
-                    
-                    // Clean prefix trailing dots
-                    let cleanPrefix = currentPrefix;
-                    if (cleanPrefix.endsWith("...")) cleanPrefix = cleanPrefix.substring(0, cleanPrefix.length - 3).trim();
+                    let cleanPrefix = prefix.endsWith("...") ? prefix.slice(0, -3).trim() : prefix;
 
-                    // Reconstruct Full Sentence
-                    const fullText = `${cleanPrefix} ${suffix}`;
-                    
-                    db.push({
-                        text: fullText,
+                    // Add to Quiz Hacker DB
+                    newDB.push({
+                        text: `${cleanPrefix} ${suffix}`,
                         prefix: cleanPrefix,
                         suffix: suffix,
                         isTrue: isTrue,
-                        topic: currentTopic
+                        topic: topic
                     });
+
+                    // Add to Code Breaker DB (Solo se Vero e ha lunghezza adeguata)
+                    if (isTrue && suffix.split(' ').length > 1 && suffix.length < 30) {
+                        // Cerchiamo una parola chiave nel suffisso da nascondere
+                        const words = suffix.split(' ');
+                        const targetWord = words.sort((a,b) => b.length - a.length)[0].toUpperCase().replace(/[^A-Z]/g, ''); // Parola più lunga
+                        
+                        if (targetWord.length > 3) {
+                            newBreaker.push({
+                                pre: cleanPrefix,
+                                word: targetWord,
+                                post: suffix.replace(new RegExp(targetWord, 'i'), "_____"), // Sostituzione grezza per visual
+                                fullSuffix: suffix,
+                                topic: topic
+                            });
+                        }
+                    }
+
                 } else {
-                    // It's a prefix question line
-                    currentPrefix = line;
+                    prefix = line;
                 }
             });
-            return db;
-        }
 
-        // 3. UI GENERATION
-        function initApp() {
-            // Parse Data
-            fullDatabase = parseContent(rawFileContent);
-            
-            // Expand Data for Demo (Since raw string above is short, we replicate logic to simulate massive DB)
-            // In production, the rawFileContent would contain the full 7000 lines.
-            // Here I multiply the data to show performance UI
-            const baseDB = [...fullDatabase];
-            for(let i=0; i<50; i++) {
-                baseDB.forEach(item => {
-                    fullDatabase.push({...item}); 
-                });
+            // Expand DB for demo purpose (In production this would be just fullDB = newDB)
+            // Moltiplichiamo i dati per simulare la massa
+            for(let i=0; i<20; i++) {
+                newDB.forEach(item => fullDB.push({...item}));
+                newBreaker.forEach(item => breakerDB.push({...item}));
             }
             
-            // Update Stats
-            document.getElementById('total-count').innerText = fullDatabase.length.toLocaleString();
-            
-            // Generate Topic Buttons
-            const topicsContainer = document.getElementById('category-filters');
-            Array.from(topics).forEach(topic => {
-                const btn = document.createElement('button');
-                btn.className = 'cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all whitespace-nowrap';
-                btn.innerText = topic.toUpperCase();
-                btn.onclick = () => filterByTopic(topic, btn);
-                topicsContainer.appendChild(btn);
-            });
+            // Shuffle
+            fullDB.sort(() => Math.random() - 0.5);
+            breakerDB.sort(() => Math.random() - 0.5);
 
-            // Initial Render
-            document.getElementById('loader').classList.add('hidden');
-            applyFilters();
+            document.getElementById('total-count-display').innerText = `Database: ${fullDB.length} Quiz Attivi`;
         }
 
-        // 4. FILTERING & RENDERING
-        let activeTopic = 'all';
-        let searchQuery = '';
-        let renderLimit = 50;
-
-        function filterByTopic(topic, btnElement) {
-            activeTopic = topic;
-            
-            // Update UI Buttons
-            document.querySelectorAll('.cat-btn').forEach(b => {
-                b.className = 'cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all whitespace-nowrap';
-            });
-            
-            if (topic === 'all') {
-                document.getElementById('btn-all').className = 'cat-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white border border-blue-500 transition-all whitespace-nowrap';
-            } else if (btnElement) {
-                btnElement.className = 'cat-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white border border-blue-500 transition-all whitespace-nowrap';
-            }
-
-            applyFilters();
+        function switchApp(app) {
+            document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
+            if(app === 'menu') document.getElementById('main-menu').classList.add('active');
+            if(app === 'hacker') { document.getElementById('app-hacker').classList.add('active'); initHacker(); }
+            if(app === 'breaker') { document.getElementById('app-breaker').classList.add('active'); initBreaker(); }
         }
 
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase();
-            applyFilters();
-        });
+        // ================= APP 1: QUIZ HACKER =================
+        let qh_pool = [];
+        let qh_current = null;
+        let qh_score = 0;
+        let qh_streak = 0;
+        let qh_lives = 3;
 
-        function applyFilters() {
-            filteredDatabase = fullDatabase.filter(item => {
-                // Topic Filter
-                if (activeTopic !== 'all' && item.topic !== activeTopic) return false;
-                
-                // Search Filter
-                if (searchQuery && !item.text.toLowerCase().includes(searchQuery)) return false;
-                
-                return true;
-            });
+        function initHacker() {
+            qh_pool = [...fullDB].sort(() => Math.random() - 0.5);
+            qh_lives = 3;
+            qh_score = 0;
+            qh_streak = 0;
+            updateHackerUI();
+            nextHackerCard();
+        }
 
-            document.getElementById('filtered-count').innerText = filteredDatabase.length.toLocaleString();
+        function nextHackerCard() {
+            if(qh_pool.length === 0) qh_pool = [...fullDB]; // Refill
+            qh_current = qh_pool.pop();
             
-            if(filteredDatabase.length === 0) {
-                document.getElementById('empty-state').classList.remove('hidden');
+            // Reset Animation
+            const card = document.getElementById('qh-card');
+            card.classList.remove('card-enter', 'shake');
+            void card.offsetWidth; card.classList.add('card-enter');
+
+            // Set Data
+            document.getElementById('qh-topic').innerText = qh_current.topic;
+            
+            // Set Icon based on Topic/Text
+            const iconBox = document.getElementById('qh-icon');
+            let iconClass = 'icon-theory';
+            let faIcon = 'fa-book';
+            
+            const txt = qh_current.text.toLowerCase();
+            if(txt.includes('pericolo') || txt.includes('preannuncia')) { iconClass = 'icon-danger'; faIcon = 'fa-triangle-exclamation'; }
+            else if(txt.includes('vieta') || txt.includes('divieto')) { iconClass = 'icon-prohibition'; faIcon = 'fa-ban'; }
+            else if(txt.includes('obblig')) { iconClass = 'icon-obligation'; faIcon = 'fa-circle-exclamation'; }
+            
+            iconBox.className = `category-icon ${iconClass}`;
+            iconBox.innerHTML = `<i class="fas ${faIcon}"></i>`;
+
+            // Set Text with Highlight
+            document.getElementById('qh-text-container').innerHTML = `
+                <span class="prefix-text">${qh_current.prefix}</span>
+                <span class="highlight-text">${qh_current.suffix}</span>
+            `;
+        }
+
+        function qh_answer(userChoice) {
+            const isCorrect = (userChoice === qh_current.isTrue);
+            
+            // Visual Feedback
+            const feedback = document.getElementById('qh-feedback');
+            const fbIcon = document.getElementById('qh-feedback-icon');
+            feedback.classList.remove('hidden');
+            feedback.classList.add('flex');
+            
+            if(isCorrect) {
+                fbIcon.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                qh_score += 10 + qh_streak;
+                qh_streak++;
             } else {
-                document.getElementById('empty-state').classList.add('hidden');
+                fbIcon.innerHTML = '<i class="fas fa-times text-red-500"></i>';
+                qh_lives--;
+                qh_streak = 0;
+                document.getElementById('qh-card').classList.add('shake');
             }
+            
+            fbIcon.className = "text-8xl transform scale-150 transition-transform duration-200";
+            updateHackerUI();
 
-            renderLimit = 50;
-            document.getElementById('list-view').scrollTop = 0;
-            renderList(true);
-        }
-
-        function renderList(reset = false) {
-            const container = document.getElementById('list-view');
-            if (reset) container.innerHTML = '';
-
-            const fragment = document.createDocumentFragment();
-            const batch = filteredDatabase.slice(reset ? 0 : renderLimit - 50, renderLimit);
-
-            batch.forEach(item => {
-                const el = document.createElement('div');
-                el.className = 'quiz-item group';
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+                feedback.classList.remove('flex');
+                fbIcon.classList.remove('scale-150');
                 
-                // Determine Icon based on Topic
-                let icon = 'fa-file-lines';
-                let colorClass = 'text-slate-400';
-                let bgClass = 'bg-slate-800';
-                
-                if(item.topic.toLowerCase().includes('strada')) { icon = 'fa-road'; colorClass='text-gray-400'; }
-                else if(item.topic.toLowerCase().includes('segnal')) { icon = 'fa-triangle-exclamation'; colorClass='text-yellow-500'; bgClass='bg-yellow-500/10'; }
-                else if(item.topic.toLowerCase().includes('veicoli')) { icon = 'fa-car'; colorClass='text-blue-400'; bgClass='bg-blue-500/10'; }
-                else if(item.topic.toLowerCase().includes('norme')) { icon = 'fa-gavel'; colorClass='text-purple-400'; bgClass='bg-purple-500/10'; }
-
-                // Text Highlighting
-                let displayHTML = '';
-                if(item.prefix && item.suffix) {
-                    displayHTML = `<span class="prefix-text">${item.prefix}</span> <span class="hl-text group-hover:text-blue-300 transition-colors">${item.suffix}</span>`;
+                if(qh_lives <= 0) {
+                    alert(`GAME OVER! Punti: ${qh_score}`);
+                    switchApp('menu');
                 } else {
-                    displayHTML = `<span class="hl-text">${item.text}</span>`;
+                    nextHackerCard();
                 }
-
-                if(searchQuery) {
-                    const regex = new RegExp(`(${searchQuery})`, 'gi');
-                    displayHTML = displayHTML.replace(regex, '<span class="bg-yellow-500/30 text-yellow-200 px-1 rounded">$1</span>');
-                }
-
-                el.innerHTML = `
-                    <div class="verdict ${item.isTrue ? 'v-true' : 'v-false'}">${item.isTrue ? 'V' : 'F'}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="category-badge ${bgClass} ${colorClass} border border-white/5">
-                                <i class="fas ${icon} text-[10px]"></i>
-                                ${item.topic}
-                            </span>
-                        </div>
-                        <div class="text-sm leading-snug text-slate-300">
-                            ${displayHTML}
-                        </div>
-                    </div>
-                `;
-                fragment.appendChild(el);
-            });
-
-            container.appendChild(fragment);
+            }, 600);
         }
 
-        // 5. INFINITE SCROLL
-        const observer = new IntersectionObserver((entries) => {
-            if(entries[0].isIntersecting && renderLimit < filteredDatabase.length) {
-                renderLimit += 50;
-                renderList(false);
+        function updateHackerUI() {
+            document.getElementById('qh-score').innerText = qh_score;
+            document.getElementById('qh-streak').innerText = qh_streak;
+            let livesHTML = '';
+            for(let i=0; i<3; i++) {
+                livesHTML += i < qh_lives ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart opacity-30"></i>';
             }
-        }, { root: document.getElementById('list-view'), threshold: 0.1 });
-        
-        observer.observe(document.getElementById('sentinel'));
+            document.getElementById('qh-lives').innerHTML = livesHTML;
+        }
 
-        // Start
-        setTimeout(initApp, 100);
+        // ================= APP 2: CODE BREAKER =================
+        let cb_pool = [];
+        let cb_current = null;
+        let cb_user_input = [];
+        let cb_level = 1;
+
+        function initBreaker() {
+            cb_pool = [...breakerDB].sort(() => Math.random() - 0.5);
+            cb_level = 1;
+            loadBreakerLevel();
+        }
+
+        function loadBreakerLevel() {
+            if(cb_pool.length === 0) cb_pool = [...breakerDB]; // Refill
+            cb_current = cb_pool.pop();
+            cb_user_input = Array(cb_current.word.length).fill('');
+            
+            document.getElementById('cb-lvl').innerText = cb_level;
+            document.getElementById('cb-topic').innerText = cb_current.topic;
+            
+            // Set Question Text (Masked)
+            // Replace the keyword in the suffix with a gap
+            const displaySuffix = cb_current.fullSuffix.replace(new RegExp(cb_current.word, 'i'), '<span class="text-green-500 font-bold">[ ... ]</span>');
+            
+            document.getElementById('cb-question-text').innerHTML = `
+                <span class="text-slate-500">${cb_current.pre}</span><br>
+                <span class="text-white text-lg">${displaySuffix}</span>
+            `;
+
+            // Render Slots
+            const slotsContainer = document.getElementById('cb-slots');
+            slotsContainer.innerHTML = '';
+            for(let i=0; i<cb_current.word.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.id = `slot-${i}`;
+                slotsContainer.appendChild(slot);
+            }
+            highlightSlot(0);
+
+            // Render Keyboard (Target letters + Noise)
+            const kbContainer = document.getElementById('cb-keys');
+            kbContainer.innerHTML = '';
+            let pool = cb_current.word.split('');
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            for(let i=0; i<4; i++) pool.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
+            pool.sort(() => Math.random() - 0.5);
+            
+            pool.forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn text-green-400 border-green-900';
+                btn.innerText = char;
+                btn.onclick = () => typeChar(char);
+                kbContainer.appendChild(btn);
+            });
+        }
+
+        function typeChar(char) {
+            const idx = cb_user_input.findIndex(c => c === '');
+            if(idx !== -1) {
+                cb_user_input[idx] = char;
+                const s = document.getElementById(`slot-${idx}`);
+                s.innerText = char;
+                s.classList.add('filled');
+                highlightSlot(idx+1);
+            }
+        }
+
+        function cb_delete() {
+            let idx = -1;
+            for(let i = cb_user_input.length - 1; i >= 0; i--) {
+                if(cb_user_input[i] !== '') { idx = i; break; }
+            }
+            if(idx !== -1) {
+                cb_user_input[idx] = '';
+                const s = document.getElementById(`slot-${idx}`);
+                s.innerText = '';
+                s.classList.remove('filled', 'wrong');
+                highlightSlot(idx);
+            }
+        }
+
+        function highlightSlot(idx) {
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
+            const el = document.getElementById(`slot-${idx}`);
+            if(el) el.classList.add('active');
+        }
+
+        function cb_check() {
+            const attempt = cb_user_input.join('');
+            const slots = document.getElementById('cb-slots');
+            
+            if(attempt === cb_current.word) {
+                document.querySelectorAll('.slot').forEach(s => s.classList.add('correct'));
+                setTimeout(() => {
+                    cb_level++;
+                    loadBreakerLevel();
+                }, 1000);
+            } else {
+                slots.classList.add('shake');
+                document.querySelectorAll('.slot').forEach(s => s.classList.add('wrong'));
+                setTimeout(() => {
+                    slots.classList.remove('shake');
+                    document.querySelectorAll('.slot').forEach(s => s.classList.remove('wrong'));
+                }, 500);
+            }
+        }
+
+        // Init
+        parseData();
 
     </script>
 </body>
