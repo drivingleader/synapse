@@ -2,91 +2,69 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Patente Z - Pattern Matching</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         :root {
             --bg-dark: #09090b;
-            --card-bg: #18181b;
-            --primary: #8b5cf6; /* Violet 500 */
-            --success: #22c55e; /* Green 500 */
-            --danger: #ef4444; /* Red 500 */
+            --primary: #8b5cf6;
+            --header-h: 70px;
+            --nav-h: 80px;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-dark);
             color: #ffffff;
-            overflow: hidden; /* Prevent scrolling on body, handle in containers */
+            height: 100dvh;
+            overflow: hidden;
             -webkit-tap-highlight-color: transparent;
+            /* Questa proprietà rende i click istantanei su mobile */
+            touch-action: manipulation; 
         }
-        
+
         /* Utility */
+        .glass-panel {
+            background: rgba(30, 30, 35, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* Animations */
-        @keyframes slideInUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @keyframes slideIn { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+        
+        .anim-enter { animation: slideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .anim-shake { animation: shake 0.3s ease-in-out; }
+
+        /* Button Active State - Pure CSS for reliability */
+        .btn-game {
+            transition: transform 0.1s, filter 0.1s;
+        }
+        .btn-game:active {
+            transform: scale(0.92);
+            filter: brightness(1.2);
         }
 
-        @keyframes pulse-subtle {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-8px); }
-            40% { transform: translateX(8px); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(4px); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .anim-enter { animation: slideInUp 0.3s ease-out forwards; }
-        .anim-shake { animation: shake 0.4s ease-in-out; }
-        .anim-fade { animation: fadeIn 0.2s ease-out; }
-
-        /* UI Elements */
-        .glass-panel {
-            background: rgba(24, 24, 27, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .btn-action {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-action:active {
-            transform: scale(0.96);
-        }
-
-        /* Checkbox Custom */
+        /* Checkbox Style */
         .custom-checkbox input:checked + div {
             background-color: var(--primary);
             border-color: var(--primary);
         }
-        .custom-checkbox input:checked + div svg {
-            display: block;
-        }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="flex flex-col h-full w-full max-w-md mx-auto bg-[#09090b] shadow-2xl relative">
 
-    <!-- HIDDEN DATA SOURCE -->
+    <!-- DATA SOURCE (Listato A B 2026 Completo) -->
     <div id="raw-data" style="display:none;">
 Listato A B 2026
 Metodo:  Raggruppamento per radice testuale (Pattern Matching)
@@ -95,9 +73,8 @@ Argomento: La strada
 La strada è...
 [ F ] ...riservata alla circolazione dei soli autoveicoli e motocicli
 [ V ] ...aperta alla circolazione dei pedoni, degli animali e dei veicoli
-[ F ] ...qualsiasi area asfaltata, limitata lateralmente dagli attraversamenti pedonali
-La strada è normalmente...
-[ F ] ...riservata alla circolazione dei soli veicoli e animali
+[ F ] ...qualsiasi area asfaltata, limitata lateralmente dagli attraversamenti pedonali 
+[ F ] …normalmente riservata alla circolazione dei soli veicoli e animali
 La strada può...
 [ V ] ...comprendere le piste ciclabili
 [ V ] ...essere suddivisa in carreggiate
@@ -126,10 +103,9 @@ Fanno parte della carreggiata...
 [ F ] ...le banchine
 [ F ] ...le corsie di emergenza delle autostrade
 La carreggiata non comprende...
-[ V ] ...le piste ciclabili
-[ V ] ...i marciapiedi
-La carreggiata comprende...
-[ F ] ...le piazzole di sosta
+[ V ] ...non comprende le piste ciclabili
+[ V ] ...non comprende i marciapiedi 
+[ F ] ...comprende le piazzole di sosta
 Argomento: La corsia
 La corsia è...
 [ V ] ...limitata da strisce continue o discontinue
@@ -142,8 +118,9 @@ La corsia può...
 [ F ] ...essere a doppio senso di circolazione
 [ V ] ...essere destinata alla normale marcia dei veicoli
 [ V ] ...essere destinata ad effettuare sorpassi
-[ V ] ...essere riservata ai veicoli che intendono svoltare (corsia specializzata)
+[ V ] ...essere destinata al rallentamento dei veicoli in uscita dalle autostrade
 [ V ] ...essere destinata alle soste di emergenza, in caso di guasto o malessere
+[ V ] ...essere riservata ai veicoli che intendono svoltare (corsia specializzata)
 [ V ] ...essere riservata alla circolazione di alcune categorie di veicoli (taxi, autobus, ecc.)
 [ V ] ...essere di accelerazione
 [ V ] ...essere di decelerazione
@@ -162,8 +139,6 @@ La corsia di decelerazione...
 [ V ] ...serve per uscire dalla carreggiata dell’autostrada ed entrare nell’area di servizio
 [ F ] ...serve ad entrare in autostrada
 [ F ] ...serve per entrare in una piazzola di sosta
-La corsia può essere destinata...
-[ V ] ...al rallentamento dei veicoli in uscita dalle autostrade
 Fuori dai centri abitati...
 [ F ] ...su una stessa corsia possono circolare affiancati due ciclomotori
 Nei centri abitati...
@@ -182,18 +157,16 @@ L'intersezione (incrocio) a raso...
 [ V ] ...può essere regolata da semaforo
 [ F ] ...è un'intersezione a livelli sfalsati
 [ F ] ...è un insieme di sovrappassi, sottopassi e rampe
-Nell'intersezione (incrocio) a raso...
-[ V ] ...due o più strade si incrociano allo stesso livello
-L'intersezione a livelli sfalsati è...
-[ F ] ...un incrocio a raso fra una strada e i binari del treno
+Nell'intersezione (incrocio) a...
+[ V ] ...raso due o più strade si incrociano allo stesso livello
+[ F ] ...livelli sfalsati non valgono i limiti massimi generali di velocità
 L'intersezione (incrocio) a livelli sfalsati...
 [ V ] ...è munita di infrastrutture (rampe, sovrappassi, sottopassi) per il collegamento fra strade poste a livelli diversi
 [ V ] ...comprende strade situate ad altezze diverse
 [ V ] ...facilita la circolazione, perché esclude l'incrocio diretto fra i veicoli
 [ V ] ...comprende rampe, sovrappassi o sottopassi
 [ F ] ...è, di norma, regolata da semafori
-Nell'intersezione (incrocio) a livelli sfalsati...
-[ F ] ...non valgono i limiti massimi generali di velocità
+[ F ] ...un incrocio a raso fra una strada e i binari del treno
 Argomento: Passaggi a livello ed attraversamenti Tranviari
 In un passaggio a livello si possono trovare...
 [ V ] ...le luci rosse
@@ -338,41 +311,36 @@ Nelle aree pedonali...
 [ V ] ...possono transitare i veicoli della polizia, con sirena e luce lampeggiante blu in funzione
 [ V ] ...possono transitare i veicoli ad emissione zero (elettrici), se espressamente consentito
 Lezione: 01.2 Doveri del conducente nell'uso della strada, convivenza civile ed uso responsabile della strada
-Argomento: Divieti generali
-È vietato rimuovere...
-[ V ] ...la segnaletica stradale
+Argomento: Divieti generali 
 Spostare la segnaletica...
 [ V ] ...stradale può comportare pericolo grave per gli altri utenti della strada
-È vietato spostare o imbrattare...
-[ V ] ...la segnaletica stradale
+È vietato...
+[ V ] ...spostare o imbrattare la segnaletica stradale
+[ V ] ...rimuovere la segnaletica stradale
+[ V ] … danneggiare le opere e gli impianti stradali
+[ V ] ...sporcare la carreggiata depositando rifiuti
+[ V ] ...gettare oggetti e rifiuti dai veicoli in movimento
+[ F ] ...parcheggiare nelle zone residenziali
+[ V ] ...lanciare dal finestrino mozziconi di sigaretta accesi
+[ V ] ...spargere fango o detriti sulle strade con le ruote sporche dei veicoli
+[ V ] ...immettersi sulle strade con le ruote del veicolo sporche di fango
 E' consentito spostare...
 [ F ] ...la segnaletica stradale, se si tratta delle barriere di delimitazione o dei coni stradali
 [ F ] ...la segnaletica stradale, se non si tratta di segnali di pericolo
 [ F ] ...la segnaletica stradale, dopo aver avvisato gli organi di polizia
 [ F ] ...i segnali stradali verticali temporanei per parcheggiare il veicolo
-È vietato danneggiare...
-[ V ] ...le opere e gli impianti stradali
-Il conducente può lanciare...
-[ F ] ...oggetti dal finestrino sulla banchina
+Il conducente può...
+[ F ] ...lanciare oggetti dal finestrino sulla banchina
+[ F ] ...superare i veicoli in coda accelerando bruscamente e cambiando ripetutamente corsia
 E' consentito lanciare...
 [ F ] ...la carta dal finestrino
-È vietato sporcare...
-[ V ] ...la carreggiata depositando rifiuti
-È vietato gettare...
-[ V ] ...oggetti e rifiuti dai veicoli in movimento
-Su tutte le strade è vietato...
-[ F ] ...il transito dei veicoli che superano 10 m di lunghezza
-[ F ] ...esercitarsi alla guida
-Su tutte le strade sono vietati...
-[ F ] ...gli avvisatori acustici (clacson, trombe)
-È vietato parcheggiare...
-[ F ] ...nelle zone residenziali
-Gettare mozziconi accesi...
-[ V ] ...dai finestrini in prossimità di boschi o aree verdi potrebbe causare incendi
-È vietato lanciare...
-[ V ] ...dal finestrino mozziconi di sigaretta accesi
-Gettare mozziconi di sigaretta...
-[ V ] ...accesi dai finestrini è molto pericoloso soprattutto se sopraggiungono veicoli a due ruote
+Su tutte le strade...
+[ F ] ...è vietato il transito dei veicoli che superano 10 m di lunghezza
+[ F ] ...è vietato esercitarsi alla guida
+[ F ] ...sono vietati gli avvisatori acustici (clacson, trombe)
+Gettare mozziconi...
+[ V ] ...accesi dai finestrini in prossimità di boschi o aree verdi potrebbe causare incendi
+[ V ] ...di sigaretta accesi dai finestrini è molto pericoloso soprattutto se sopraggiungono veicoli a due ruote
 Sulle strade pubbliche sono consentite...
 [ F ] ...le gare di velocità, anche se non autorizzate, dalle ore 23.00 alle ore 6.00
 [ F ] ...le gare di velocità, anche se non autorizzate, tra motocicli e non tra autoveicoli
@@ -386,13 +354,9 @@ Le competizioni sportive...
 [ V ] ...il conducente che partecipa a gare di velocità non autorizzate su aree pubbliche
 Sulle strade è vietato gareggiare...
 [ V ] ...in velocità
-Il conducente può superare...
-[ F ] ...i veicoli in coda accelerando bruscamente e cambiando ripetutamente corsia
 Il conducente che si accorge...
 [ V ] ...che il suo veicolo perde olio deve compiere tutte le azioni necessarie per evitare pericoli per altri utenti
 [ V ] ...che il suo veicolo ha forti perdite di olio o carburante, deve immediatamente avvisare l’ente proprietario della strada o gli organi di polizia
-È vietato spargere fango...
-[ V ] ...o detriti sulle strade con le ruote sporche dei veicoli
 Uscendo da un sentiero fangoso...
 [ V ] ...o da un cantiere, bisogna assicurarsi che durante la marcia non cada terriccio che possa sporcare la strada
 Per evitare di sporcare...
@@ -401,8 +365,6 @@ Se, uscendo da un sentiero fangoso...
 [ V ] ...si sporca notevolmente la strada, si può incorrere in una sanzione amministrativa
 Su una strada ricoperta...
 [ F ] ...da brecciolino il conducente può circolare a velocità sostenuta
-È vietato immettersi...
-[ V ] ...sulle strade con le ruote del veicolo sporche di fango
 Alla guida di un veicolo...
 [ V ] ...il conducente deve procedere a bassa velocità sopra le pozzanghere
 Argomento: Convivenza Civile ed Uso Responsabile della Strada
@@ -422,6 +384,8 @@ Il conducente di un veicolo...
 [ V ] ...deve tutelare la propria e l'altrui sicurezza
 [ V ] ...deve cercare di prevedere il comportamento degli altri utenti
 [ V ] ...non deve fare sempre affidamento sul comportamento degli altri, che può non essere corretto
+[ V ] ...diverso dai taxi non può sostare nei posteggi riservati ai taxi
+[ F ] ...diverso dai taxi può sostare nei posteggi riservati ai taxi dalle ore 20.00 alle ore 8.00
 Il conducente deve...
 [ F ] ...dare segni di impazienza, se il veicolo che sta davanti procede troppo lentamente
 [ F ] ...concentrarsi prevalentemente sul tratto di strada non superiore a tre metri antistante il suo veicolo
@@ -449,12 +413,10 @@ I ciclomotori...
 [ V ] ...possono avere due o tre ruote
 [ F ] ...non sono soggetti a revisione periodica
 [ F ] ...non hanno più di due ruote
-I ciclomotori possono...
-[ F ] ...circolare alla velocità di 60 km/h fuori dai centri urbani
-I ciclomotori, per essere definiti tali, devono essere...
-[ F ] ...muniti di cambio manuale
-I ciclomotori a due ruote non possono avere...
-[ V ] ...un motore termico di cilindrata superiore a 50 cm3
+[ F ] ...possono circolare alla velocità di 60 km/h fuori dai centri urbani
+[ F ] ...per essere definiti tali, devono essere muniti di cambio manuale
+[ V ] ...a due ruote non possono avere un motore termico di cilindrata superiore a 50 cm3
+[ V ] ...non rientrano nella categoria dei motocicli
 I veicoli a due ruote...
 [ V ] ...con motore termico fino a 50 cm3 di cilindrata e velocità massima di 45 km/h sono ciclomotori
 Non tutti i veicoli a motore...
@@ -467,16 +429,13 @@ E' consentito...
 [ F ] ...aumentare la cilindrata dei quadricicli leggeri purché non si aumenti la velocità
 [ F ] ...sostituire il motore del quadriciclo leggero per aumentare la velocità massima oltre i 45 km/h
 [ F ] ...sostituire il dispositivo di scarico dei quadricicli leggeri per aumentare la velocità massima, purché non si aumenti la cilindrata del motore
-I quadricicli...
-[ V ] ...sono soggetti a revisione periodica
-[ F ] ...non sono soggetti a revisione periodica
-I quadricicli non leggeri...
-[ F ] ...a manubrio e con carrozzeria aperta possono essere condotti senza casco
-I quadricicli leggeri...
+I quadricicli leggeri... 
 [ V ] ...alimentati a benzina hanno cilindrata del motore inferiore o pari a 50 cm3
-[ V ] ...ai fini della circolazione, sono assimilati ai ciclomotori
+[ V ] ...ai fini della circolazione, sono assimilati ai ciclomotori 
 La guida dei quadricicli non leggeri...
 [ F ] ...è consentita già al compimento del quattordicesimo anno di età
+Ai fini della circolazione i quadricicli leggeri sono assimilati...
+[ F ] ...ai motocicli
 Argomento: Motoveicoli
 I motocicli...
 [ V ] ...sono soggetti a revisione dopo quattro anni dalla prima immatricolazione, successivamente ogni due anni
@@ -489,10 +448,6 @@ Tutti i veicoli a motore con tre ruote...
 [ F ] ...sono dei motocicli
 Si definiscono motocicli solo i veicoli...
 [ F ] ...a due ruote di cilindrata fino a 125 cm3
-I ciclomotori non rientrano...
-[ V ] ...nella categoria dei motocicli
-Ai fini della circolazione i quadricicli leggeri sono assimilati...
-[ F ] ...ai motocicli
 Il motociclo è...
 [ F ] ...un qualunque veicolo a due ruote
 I tricicli a motore sono...
@@ -504,14 +459,18 @@ I tricicli a motore sono...
 [ V ] ...veicoli a motore aventi una velocità massima per costruzione superiore a 45 km/h
 [ V ] ...veicoli con motore di cilindrata superiore a 50 cm3
 [ F ] ...veicoli con motore di cilindrata inferiore a 50 cm3 e aventi velocità massima per costruzione fino a 45 km/h
-I quadricicli diversi da quelli leggeri possono essere guidati...
-[ F ] ...senza patente
 I quadricicli...
 [ V ] ...sono veicoli a motore a quattro ruote
-I quadricicli non leggeri, ai fini della circolazione, sono equiparati...
-[ F ] ...ai ciclomotori
+[ V ] ...sono soggetti a revisione periodica
+[ F ] ...non sono soggetti a revisione periodica
+[ F ] ...non leggeri a manubrio e con carrozzeria aperta possono essere condotti senza casco
+[ F ] ...diversi da quelli leggeri possono essere guidati senza patente
+[ F ] ...non leggeri, ai fini della circolazione, sono equiparati ai ciclomotori
+[ V ] ...non sono autoveicoli
 La potenza dei quadricicli non leggeri è sempre...
 [ V ] ...inferiore o uguale a 15 kW
+Il triciclo a motore è...
+[ F ] ...un autoveicolo
 Argomento: Autoveicoli
 Gli autoveicoli sono...
 [ F ] ...tutti i veicoli con almeno due ruote
@@ -522,24 +481,17 @@ L'autoveicolo è...
 [ F ] ...un qualunque veicolo adibito al trasporto di merce
 [ F ] ...un qualunque veicolo a motore
 [ V ] ...un veicolo a motore con non meno di quattro ruote, eccetto i quadricicli
-Il triciclo a motore è...
-[ F ] ...un autoveicolo
-Le autovetture possono avere...
-[ V ] ...motore elettrico
-Le autovetture sono soggette a revisione...
-[ V ] ...periodica
-[ F ] ...ogni cinque anni
-Le autovetture non possono trainare...
-[ F ] ...carrelli-appendice o rimorchi
-L'autovettura è...
-[ F ] ...un veicolo con dieci posti in totale, compreso il conducente
-[ V ] ...un veicolo a motore con quattro ruote, destinato al trasporto di massimo nove persone, compreso il conducente
-L'autovettura fa parte...
-[ V ] ...degli autoveicoli
-L'autovettura può avere...
-[ F ] ...al massimo, cinque posti
-L'autovettura non può avere...
-[ V ] ...più di nove posti, compreso il conducente
+Le autovetture...
+[ V ] ...possono avere motore elettrico 
+[ V ] ...sono soggette a revisione periodica
+[ F ] ...sono soggette a revisione ogni cinque anni 
+[ F ] ...non possono trainare carrelli-appendice o rimorchi
+L'autovettura...
+[ F ] ...è un veicolo con dieci posti in totale, compreso il conducente
+[ V ] ...è un veicolo a motore con quattro ruote, destinato al trasporto di massimo nove persone, compreso il conducente 
+[ V ] ...fa parte degli autoveicoli 
+[ F ] ...può avere al massimo, cinque posti 
+[ V ] ...non può avere più di nove posti, compreso il conducente
 Vengono definite autovetture tutti i veicoli...
 [ F ] ...con motore anteriore
 Si definiscono autovetture tutti i veicoli...
@@ -553,42 +505,34 @@ Le autocaravan (camper) sono...
 [ F ] ...veicoli destinati alla costruzione e alla manutenzione di opere stradali
 [ V ] ...veicoli attrezzati permanentemente per essere adibiti al trasporto ed all'alloggio di persone
 [ F ] ...rimorchi
+[ V ] ...soggette a revisione periodica
+[ F ] ...soggette a revisione ogni cinque anni
 Sulle autocaravan (camper) è possibile viaggiare...
 [ F ] ...in piedi, solo per brevi tratti
-Le autocaravan sono soggette a revisione...
-[ V ] ...periodica
-[ F ] ...ogni cinque anni
-L'autobus viene classificato...
-[ V ] ...autoveicolo
-L'autobus non è...
-[ V ] ...un'autovettura
+L'autobus...
+[ V ] ...viene classificato autoveicolo 
+[ V ] ...non è un'autovettura 
 L'autocarro è...
 [ V ] ...un autoveicolo
 [ F ] ...un'autovettura
-I quadricicli non sono...
-[ V ] ...autoveicoli
 Argomento: Macchine agricole e Macchine Operatrici
 Sulle macchine agricole e sui loro rimorchi è consentito...
 [ F ] ...il trasporto di persone in piedi
-Le macchine agricole possono...
-[ V ] ...essere a ruote o a cingoli
-[ F ] ...trasportare fino a quattro passeggeri
-[ V ] ...essere semoventi o trainate
-[ V ] ...circolare su strada per il proprio trasferimento se immatricolate
-Le macchine agricole a ruote o a cingoli possono circolare su strada...
-[ V ] ...per il trasporto di prodotti agricoli per conto delle aziende agricole e forestali
+Le macchine agricole...
+[ V ] ...possono essere a ruote o a cingoli
+[ F ] ...possono trasportare fino a quattro passeggeri
+[ V ] ...possono essere semoventi o trainate
+[ V ] ...possono circolare su strada per il proprio trasferimento se immatricolate
+[ V ] ...a ruote o a cingoli possono circolare su strada per il trasporto di prodotti agricoli per conto delle aziende agricole e forestali
 Con la patente di categoria A si possono guidare...
 [ F ] ...tutte le macchine agricole
-Le macchine agricole operatrici possono essere dotate...
-[ V ] ...di speciali attrezzature per l'esecuzione di operazioni agricole
-Le macchine operatrici possono...
-[ V ] ...essere veicoli sgombraneve
-[ F ] ...circolare ad una velocità superiore a 50 km/h
-[ V ] ...essere semoventi o trainate
-Le macchine operatrici semoventi possono trasportare...
-[ F ] ...fino a quattro passeggeri
-Le macchine operatrici a cingoli possono circolare...
-[ F ] ...ad una velocità superiore a 45 km/h
+Le macchine operatrici...
+[ V ] ...possono essere veicoli sgombraneve
+[ F ] ...possono circolare ad una velocità superiore a 50 km/h
+[ V ] ...possono essere semoventi o trainate
+[ V ] ...possono essere dotate di speciali attrezzature per l'esecuzione di operazioni agricole
+[ F ] ...semoventi possono trasportare fino a quattro passeggeri
+[ F ] ...a cingoli possono circolare ad una velocità superiore a 45 km/h
 Per condurre macchine operatrici è necessario essere titolari della patente di guida...
 [ F ] ...della categoria A
 Con la patente di categoria B si possono guidare...
@@ -630,6 +574,8 @@ Bisogna usare maggiore prudenza nei confronti...
 [ F ] ...dei conducenti di autoveicoli elettrici
 [ F ] ...dei conducenti di taxi
 [ F ] ...dei conducenti di tricicli a motore
+[ V ] ...delle donne in stato di gravidanza che attraversano la strada
+[ V ] ...dei pedoni che spingono una carrozzina per bambini
 Bisogna usare particolare prudenza nei confronti dei conducenti che hanno conseguito la patente di guida...
 [ F ] ...in uno Stato estero
 Quando le persone anziane attraversano la carreggiata bisogna...
@@ -659,18 +605,30 @@ Il conducente deve...
 [ F ] ...passare per primo, in quanto ha la precedenza, quando un pedone non vedente con il bastone bianco attraversa la strada fuori dalle strisce pedonali
 [ F ] ...prevedere che un pedone non vedente con il bastone bianco che attraversa la strada fuori dalle strisce pedonali camminerà rapidamente e senza incertezza
 [ F ] ...dare la precedenza a un pedone non vedente che attraversa la strada fuori dalle strisce pedonali, solo se munito di bastone bianco-rosso
+[ V ] ...consentire ad una donna incinta di attraversare la strada senza metterle fretta
 Il conducente, quando un pedone non vedente con il bastone bianco attraversa la strada fuori dalle strisce pedonali...
 [ F ] ...deve dargli la precedenza solo se l'attraversamento pedonale dista oltre 100 metri
-In vicinanza di un attraversamento pedonale, il conducente deve...
-[ F ] ...considerare che un pedone munito di bastone bianco ha più esperienza su come attraversare la carreggiata
-[ F ] ...arrestarsi se il pedone che attraversa è munito di bastone bianco-rosso; deve solo rallentare se, invece, è munito di bastone bianco
+In vicinanza di un attraversamento pedonale,...
+[ F ] ...il conducente deve considerare che un pedone munito di bastone bianco ha più esperienza su come attraversare la carreggiata
+[ F ] ...il conducente deve arrestarsi se il pedone che attraversa è munito di bastone bianco-rosso; deve solo rallentare se, invece, è munito di bastone bianco
+[ V ] ...il conducente deve considerare che le reazioni dei bambini che attraversano sono imprevedibili e, quindi, possono creare pericolo
+[ V ] ...il conducente deve considerare che i bambini potrebbero avanzare sulle strisce, per poi tornare indietro improvvisamente, senza motivo apparente
+[ V ] ...il conducente deve considerare che i pedoni, in special modo i bambini, possono sbucare all'improvviso tra i veicoli parcheggiati
+[ V ] ...il conducente deve considerare che i veicoli parcheggiati in prossimità delle strisce impediscono la visuale dei pedoni
+[ F ] ...il conducente deve aspettarsi dai bambini una reazione rapida e un comportamento corretto
+[ V ] ...il conducente deve considerare che le persone anziane solitamente attraversano lentamente e con difficoltà
+[ V ] ...il conducente deve considerare che il pedone potrebbe fermarsi improvvisamente sulle strisce dell'attraversamento pedonale
+[ F ] ...il conducente deve accelerare quel tanto che basta per passare davanti al pedone che attraversa
+[ V ] ...il conducente deve considerare che il pedone, nell'attraversare la strada, può diventare insicuro e ritornare improvvisamente indietro
+[ F ] ...il conducente deve considerare che i pedoni devono attraversare la strada affiancati, in modo da impiegare meno tempo
+[ F ] ...il conducente deve considerare che se il pedone si è fermato in mezzo alle strisce dell'attraversamento significa che ha rinunciato al suo diritto di passare
+[ F ] ...i pedoni devono fare un cenno con la mano prima di iniziare l'attraversamento
 Argomento: Comportamento a salvaguardia dei bambini e donne incinte
-Quando vi sono bambini fermi al semaforo bisogna usare prudenza...
-[ V ] ...perché può accadere che si spingano a vicenda, finendo sulla carreggiata
-[ V ] ...perché potrebbero scendere dal marciapiede, invadendo la carreggiata, quando ancora per loro il semaforo è disposto al rosso
-[ V ] ...in quanto potrebbero attraversare improvvisamente la strada appena la luce del semaforo veicolare passa dal verde al giallo
-[ V ] ...in quanto potrebbero attraversare velocemente la strada anche con il rosso, ritenendo che duri troppo
 Quando vi sono bambini fermi al semaforo...
+[ V ] ...bisogna usare prudenza perché può accadere che si spingano a vicenda, finendo sulla carreggiata
+[ V ] ...bisogna usare prudenza perché potrebbero scendere dal marciapiede, invadendo la carreggiata, quando ancora per loro il semaforo è disposto al rosso
+[ V ] ...bisogna usare prudenza in quanto potrebbero attraversare improvvisamente la strada appena la luce del semaforo veicolare passa dal verde al giallo
+[ V ] ...bisogna usare prudenza in quanto potrebbero attraversare velocemente la strada anche con il rosso, ritenendo che duri troppo 
 [ F ] ...bisogna tenere presente che possono attraversare la strada solo se accompagnati da un adulto
 [ F ] ...si può essere certi che non attraverseranno la strada se il semaforo è a luce gialla lampeggiante
 [ F ] ...si può essere certi che attraverseranno la strada solo quando il semaforo pedonale abbia la luce verde accesa
@@ -679,31 +637,24 @@ I bambini, al semaforo, possono attraversare la strada...
 Prima di impegnare un incrocio, dopo che è scattata la luce verde del semaforo...
 [ V ] ...il conducente deve attendere che i pedoni abbiano finito di attraversare la strada
 Alla guida di un veicolo, in vicinanza di una piazzola di fermata di autobus...
-[ V ] ...che trasporta scolari, occorre fare attenzione ai bambini che potrebbero aver iniziato ad attraversare la carreggiata nascosti dall'autobus
-Alla guida di un veicolo, in vicinanza di una piazzola di fermata di autobus per scolari...
-[ V ] ...occorre essere prudenti e tenere conto dei comportamenti imprevedibili dei bambini
-[ V ] ...occorre fare attenzione ai bambini, che potrebbero attraversare di corsa la strada per salire sullo scuolabus
-[ V ] ...occorre prepararsi a frenare, nel caso in cui dei bambini attraversino improvvisamente la strada
-[ F ] ...non è necessario rallentare se lo scuolabus è fermo
-[ F ] ...occorre suonare per invitare i bambini che attraversano sulle strisce a dare la precedenza
-[ F ] ...non si deve rallentare, per evitare di ostacolare la circolazione degli altri veicoli
-[ F ] ...si deve rallentare solo se vi sono bambini che attraversano
-[ V ] ...bisogna rallentare particolarmente se vi è lo scuolabus
-[ F ] ...occorre fare attenzione allo scuolabus, che dopo la fermata farà sicuramente retromarcia
-[ F ] ...occorre passare per primi, avendo sempre la precedenza sui bambini che attraversano la strada
-[ F ] ...non si può proseguire nella marcia se le portiere dello scuolabus sono ancora aperte
+[ V ] ...che trasporta scolari, occorre fare attenzione ai bambini che potrebbero aver iniziato ad attraversare la carreggiata nascosti dall'autobus 
+[ V ] ...per scolari, occorre essere prudenti e tenere conto dei comportamenti imprevedibili dei bambini
+[ V ] ...per scolari, occorre fare attenzione ai bambini, che potrebbero attraversare di corsa la strada per salire sullo scuolabus
+[ V ] ...per scolari, occorre prepararsi a frenare, nel caso in cui dei bambini attraversino improvvisamente la strada
+[ F ] ...per scolari, non è necessario rallentare se lo scuolabus è fermo
+[ F ] ...per scolari, occorre suonare per invitare i bambini che attraversano sulle strisce a dare la precedenza
+[ F ] ...per scolari, non si deve rallentare, per evitare di ostacolare la circolazione degli altri veicoli
+[ F ] ...per scolar,i si deve rallentare solo se vi sono bambini che attraversano
+[ V ] ...per scolari, bisogna rallentare particolarmente se vi è lo scuolabus
+[ F ] ...per scolari, occorre fare attenzione allo scuolabus, che dopo la fermata farà sicuramente retromarcia
+[ F ] ...per scolari, occorre passare per primi, avendo sempre la precedenza sui bambini che attraversano la strada
+[ F ] ...per scolari, non si può proseguire nella marcia se le portiere dello scuolabus sono ancora aperte
 In vicinanza di una piazzola di fermata di autobus per scolari...
 [ V ] ...può accadere che i bambini scendano dall'autobus senza fare attenzione ai veicoli che sopraggiungono
-Bisogna usare maggiore prudenza nei confronti...
-[ V ] ...delle donne in stato di gravidanza che attraversano la strada
-[ V ] ...dei pedoni che spingono una carrozzina per bambini
-Quando una donna in stato di gravidanza attraversa la carreggiata bisogna...
-[ F ] ...darle la precedenza solo se attraversa da sinistra a destra
-[ F ] ...tenere presente che ha il passo più rapido e quindi attraversa velocemente
-Quando una donna in stato di gravidanza attraversa la carreggiata non bisogna...
-[ V ] ...avvicinarsi troppo con il veicolo, per evitare di spaventarla
-Il conducente deve...
-[ V ] ...consentire ad una donna incinta di attraversare la strada senza metterle fretta
+Quando una donna in stato di gravidanza attraversa la carreggiata...
+[ F ] ...bisogna darle la precedenza solo se attraversa da sinistra a destra
+[ F ] ...bisogna tenere presente che ha il passo più rapido e quindi attraversa velocemente 
+[ V ] ...non bisogna avvicinarsi troppo con il veicolo, per evitare di spaventarla
 E' consentito posteggiare un veicolo davanti agli scivoli del marciapiede...
 [ F ] ...solo dalle ore 22.00 alle ore 8.00
 Quando un pedone che spinge...
@@ -713,21 +664,7 @@ Quando si parcheggia un veicolo è vietato ostruire...
 [ V ] ...eventuali scivoli del marciapiede per non impedire il passaggio di pedoni che spingono una carrozzina per bambini
 E' consentito lasciare il veicolo in sosta sul marciapiede...
 [ F ] ...senza lasciare spazio ai pedoni che spingono una carrozzina per bambini
-Argomento: Comportamenti a salvaguardia dei Pedoni e de ciclisti
-In vicinanza di un attraversamento pedonale, il conducente deve...
-[ V ] ...considerare che le reazioni dei bambini che attraversano sono imprevedibili e, quindi, possono creare pericolo
-[ V ] ...considerare che i bambini potrebbero avanzare sulle strisce, per poi tornare indietro improvvisamente, senza motivo apparente
-[ V ] ...considerare che i pedoni, in special modo i bambini, possono sbucare all'improvviso tra i veicoli parcheggiati
-[ V ] ...considerare che i veicoli parcheggiati in prossimità delle strisce impediscono la visuale dei pedoni
-[ F ] ...aspettarsi dai bambini una reazione rapida e un comportamento corretto
-[ V ] ...considerare che le persone anziane solitamente attraversano lentamente e con difficoltà
-[ V ] ...considerare che il pedone potrebbe fermarsi improvvisamente sulle strisce dell'attraversamento pedonale
-[ F ] ...accelerare quel tanto che basta per passare davanti al pedone che attraversa
-[ V ] ...considerare che il pedone, nell'attraversare la strada, può diventare insicuro e ritornare improvvisamente indietro
-[ F ] ...considerare che i pedoni devono attraversare la strada affiancati, in modo da impiegare meno tempo
-[ F ] ...considerare che se il pedone si è fermato in mezzo alle strisce dell'attraversamento significa che ha rinunciato al suo diritto di passare
-In vicinanza di un attraversamento pedonale, i pedoni devono...
-[ F ] ...fare un cenno con la mano prima di iniziare l'attraversamento
+Argomento: Comportamenti a salvaguardia dei Pedoni e dei ciclisti 
 Il conducente, di notte...
 [ F ] ...non deve dare la precedenza ai pedoni che attraversano sulle strisce pedonali
 Quando la carreggiata è occupata da ciclisti o pedoni...
@@ -743,9 +680,6 @@ Il conducente che intende sorpassare ciclisti o pedoni che occupano la carreggia
 [ F ] ...deve mantenere una distanza laterale di almeno 2 metri
 Quando la carreggiata extraurbana è occupata da ciclisti o pedoni...
 [ V ] ...è consigliabile suonare il clacson prima di sorpassarli
-Il conducente di un veicolo diverso dai taxi...
-[ V ] ...non può sostare nei posteggi riservati ai taxi
-[ F ] ...può sostare nei posteggi riservati ai taxi dalle ore 20.00 alle ore 8.00
 Il conducente, in vicinanza di un posteggio riservato ai taxi...
 [ V ] ...deve fare attenzione ai pedoni, che possono attraversare improvvisamente la strada senza le dovute precauzioni
 [ V ] ...deve fare attenzione ai pedoni che salgono o scendono dal taxi
@@ -754,285 +688,255 @@ Il conducente, in vicinanza di un posteggio riservato ai taxi...
 [ F ] ...deve dare la precedenza ai taxi che s'immettono sulla strada
     </div>
 
-    <!-- MAIN APP WRAPPER -->
-    <div class="relative w-full max-w-md mx-auto h-full flex flex-col bg-[#09090b] shadow-2xl overflow-hidden">
-        
-        <!-- HEADER -->
-        <header class="flex justify-between items-center px-6 py-5 z-20 bg-gradient-to-b from-[#09090b] via-[#09090b] to-transparent">
-            <div>
-                <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 tracking-tight">
-                    Patente Z
-                </h1>
-                <p id="header-subtitle" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Mix Mode</p>
+    <!-- HEADER -->
+    <header class="flex-none h-[var(--header-h)] flex justify-between items-center px-6 bg-[#09090b] z-20 border-b border-white/5">
+        <div>
+            <h1 class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 tracking-tight">
+                Patente Z
+            </h1>
+            <p id="header-subtitle" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Mix Mode</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 rounded-full border border-gray-800">
+                <span class="text-green-500 text-sm">🔥</span>
+                <span id="streak-display" class="font-bold text-sm text-gray-200">0</span>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 rounded-full border border-gray-800">
-                    <span class="text-green-500 text-sm">🔥</span>
-                    <span id="streak-display" class="font-bold text-sm text-gray-200">0</span>
-                </div>
-            </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 relative flex flex-col w-full px-6 pb-6 overflow-hidden">
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 relative w-full overflow-hidden">
+        
+        <!-- VIEW: GAME -->
+        <div id="view-game" class="absolute inset-0 flex flex-col px-4 pb-2 z-10">
             
-            <!-- VIEW: QUIZ & STUDY (Shared Interface) -->
-            <div id="view-game" class="absolute inset-0 px-6 pb-6 flex flex-col z-10 transition-all duration-300">
-                
-                <!-- Progress Indicator -->
-                <div class="w-full h-1 bg-gray-800 rounded-full mb-6 mt-2 overflow-hidden">
+            <!-- Progress -->
+            <div class="flex-none h-4 flex items-center justify-center mt-2">
+                 <div class="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
                     <div id="progress-bar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 w-0 transition-all duration-300"></div>
                 </div>
+            </div>
 
-                <!-- CARD -->
-                <div class="flex-1 flex flex-col relative perspective-1000 mb-6">
-                    <div id="card-container" class="absolute inset-0 w-full h-full glass-panel rounded-3xl p-6 flex flex-col items-center text-center shadow-xl border-t border-white/10">
-                        
-                        <!-- Root (Top, Small, Dim) -->
-                        <div class="mb-auto w-full pt-4">
-                            <p id="card-root" class="text-lg font-medium text-gray-500 leading-snug select-none transition-all duration-300">
-                                Caricamento...
-                            </p>
-                        </div>
+            <!-- Card Area -->
+            <div class="flex-1 flex flex-col justify-center min-h-0 py-2 relative">
+                <div id="card-container" class="glass-panel w-full h-full rounded-3xl p-6 flex flex-col items-center text-center shadow-xl border-t border-white/10 relative overflow-hidden">
+                    
+                    <!-- Root Phrase -->
+                    <div class="flex-none pt-2 pb-4 w-full border-b border-white/5">
+                        <p id="card-root" class="text-sm md:text-base font-medium text-gray-400 leading-snug select-none">
+                            Caricamento...
+                        </p>
+                    </div>
 
-                        <!-- Divider (Visual Anchor) -->
-                        <div class="w-16 h-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent my-2"></div>
+                    <!-- Completion Phrase -->
+                    <div class="flex-1 flex items-center justify-center w-full py-2 overflow-y-auto no-scrollbar">
+                        <p id="card-completion" class="text-xl md:text-2xl font-bold text-white leading-snug select-none">
+                            --
+                        </p>
+                    </div>
 
-                        <!-- Completion (Center, Big, Bright) -->
-                        <div class="mt-auto mb-auto w-full pb-8">
-                            <p id="card-completion" class="text-2xl md:text-3xl font-bold text-white leading-tight select-none anim-enter">
-                                --
-                            </p>
-                        </div>
-
-                        <!-- Feedback Overlay -->
-                        <div id="feedback-overlay" class="absolute inset-0 z-30 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-3xl transition-opacity duration-200">
-                            <div id="feedback-icon" class="text-7xl mb-4 transform transition-transform duration-300 scale-0"></div>
-                            <div id="feedback-text" class="text-2xl font-bold text-white tracking-wide"></div>
-                        </div>
+                    <!-- Feedback Overlay -->
+                    <div id="feedback-overlay" class="absolute inset-0 z-50 hidden flex-col items-center justify-center bg-black/85 backdrop-blur-sm transition-opacity duration-200 pointer-events-none">
+                        <div id="feedback-icon" class="text-7xl mb-4 transform transition-transform duration-300 scale-0"></div>
+                        <div id="feedback-text" class="text-2xl font-bold text-white tracking-wide"></div>
                     </div>
                 </div>
-
-                <!-- CONTROLS -->
-                <div class="grid grid-cols-2 gap-4 h-24 shrink-0">
-                    <button id="btn-false" class="btn-action rounded-2xl bg-[#2c1517] border border-red-900/40 text-red-500 font-bold text-xl flex flex-col items-center justify-center shadow-lg shadow-red-900/5 active:bg-red-900/20">
-                        <i class="ph-bold ph-x text-3xl mb-1"></i>
-                        <span>FALSO</span>
-                    </button>
-                    <button id="btn-true" class="btn-action rounded-2xl bg-[#132e21] border border-green-900/40 text-green-500 font-bold text-xl flex flex-col items-center justify-center shadow-lg shadow-green-900/5 active:bg-green-900/20">
-                        <i class="ph-bold ph-check text-3xl mb-1"></i>
-                        <span>VERO</span>
-                    </button>
-                </div>
-
-                <!-- Footer Info -->
-                <div id="lesson-info" class="text-center mt-3 text-[10px] text-gray-600 font-mono truncate px-4"></div>
             </div>
 
-            <!-- VIEW: SELECTION SCREEN (For Study Mode) -->
-            <div id="view-selection" class="absolute inset-0 px-6 pb-20 flex flex-col z-20 bg-[#09090b] transform translate-y-full transition-transform duration-300 overflow-y-auto no-scrollbar">
-                <h2 class="text-xl font-bold text-white mb-2">Cosa vuoi ripassare?</h2>
-                <p class="text-sm text-gray-400 mb-6">Seleziona le lezioni per iniziare la sequenza.</p>
-                
-                <div id="selection-list" class="space-y-3 pb-24">
-                    <!-- Checkboxes injected here -->
-                </div>
-
-                <div class="fixed bottom-24 left-0 w-full px-6 pointer-events-none">
-                    <button onclick="startStudyMode()" class="pointer-events-auto w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg shadow-xl shadow-purple-900/30 active:scale-95 transition-transform">
-                        Inizia Ripasso
-                    </button>
-                </div>
+            <!-- Controls (Fixed Bottom, Big Touch Targets) -->
+            <div class="flex-none h-28 grid grid-cols-2 gap-4 pb-2 pt-2">
+                <!-- Using onclick directly for maximum reliability -->
+                <button onclick="checkAnswer(false)" class="btn-game rounded-2xl bg-[#2c1517] border border-red-900/40 text-red-500 font-bold text-xl flex flex-col items-center justify-center shadow-lg active:bg-red-900/30 select-none">
+                    <i class="ph-bold ph-x text-4xl mb-1 pointer-events-none"></i>
+                    <span class="pointer-events-none">FALSO</span>
+                </button>
+                <button onclick="checkAnswer(true)" class="btn-game rounded-2xl bg-[#132e21] border border-green-900/40 text-green-500 font-bold text-xl flex flex-col items-center justify-center shadow-lg active:bg-green-900/30 select-none">
+                    <i class="ph-bold ph-check text-4xl mb-1 pointer-events-none"></i>
+                    <span class="pointer-events-none">VERO</span>
+                </button>
             </div>
+            
+            <!-- Lesson Info -->
+            <div id="lesson-info" class="flex-none text-center text-[10px] text-gray-600 font-mono truncate h-4 mb-1"></div>
+        </div>
 
-            <!-- VIEW: PATTERN WALL -->
-            <div id="view-pattern" class="absolute inset-0 px-6 pb-24 flex flex-col z-10 bg-[#09090b] hidden overflow-y-auto no-scrollbar pt-2">
-                <!-- Injected Pattern Content -->
+        <!-- VIEW: SELECTION MENU -->
+        <div id="view-selection" class="absolute inset-0 flex flex-col px-6 bg-[#09090b] transform translate-y-full transition-transform duration-300 z-20">
+            <h2 class="text-xl font-bold text-white mb-2 mt-6 flex-none">Argomenti da ripassare</h2>
+            <div id="selection-list" class="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-24 pr-2"></div>
+            <div class="flex-none h-24 w-full pb-6 pt-2 bg-[#09090b]">
+                <button onclick="startStudyMode()" class="w-full h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg shadow-xl active:scale-95 transition-transform">
+                    AVVIA RIPASSO
+                </button>
             </div>
+        </div>
 
-        </main>
+        <!-- VIEW: PATTERN WALL -->
+        <div id="view-pattern" class="absolute inset-0 px-6 bg-[#09090b] hidden overflow-y-auto no-scrollbar z-10 pt-4 pb-24">
+            <!-- Content Injected Here -->
+        </div>
 
-        <!-- NAVIGATION BAR -->
-        <nav class="shrink-0 h-20 px-6 pb-4 pt-2 flex items-center justify-around bg-[#09090b] border-t border-white/5 relative z-50">
-            <button onclick="setMode('mix')" id="nav-mix" class="flex flex-col items-center gap-1 text-purple-400 transition-colors">
-                <i class="ph-fill ph-shuffle text-2xl"></i>
-                <span class="text-[10px] font-bold">Mix Quiz</span>
-            </button>
-            <button onclick="toggleSelectionView()" id="nav-study" class="flex flex-col items-center gap-1 text-gray-500 transition-colors">
-                <i class="ph-fill ph-student text-2xl"></i>
-                <span class="text-[10px] font-bold">Focus Studio</span>
-            </button>
-            <button onclick="setMode('pattern')" id="nav-pattern" class="flex flex-col items-center gap-1 text-gray-500 transition-colors">
-                <i class="ph-fill ph-wall text-2xl"></i>
-                <span class="text-[10px] font-bold">Muro</span>
-            </button>
-        </nav>
+    </main>
 
-    </div>
+    <!-- NAVIGATION -->
+    <nav class="flex-none h-[var(--nav-h)] bg-[#09090b] border-t border-white/5 flex items-start justify-around pt-4 z-30 pb-safe">
+        <button onclick="setMode('mix')" id="nav-mix" class="flex flex-col items-center gap-1 text-purple-400 w-20 active:scale-90 transition-transform">
+            <i class="ph-fill ph-shuffle text-2xl"></i>
+            <span class="text-[10px] font-bold">Mix</span>
+        </button>
+        <button onclick="toggleSelectionView()" id="nav-study" class="flex flex-col items-center gap-1 text-gray-500 w-20 active:scale-90 transition-transform">
+            <i class="ph-fill ph-student text-2xl"></i>
+            <span class="text-[10px] font-bold">Studio</span>
+        </button>
+        <button onclick="setMode('pattern')" id="nav-pattern" class="flex flex-col items-center gap-1 text-gray-500 w-20 active:scale-90 transition-transform">
+            <i class="ph-fill ph-wall text-2xl"></i>
+            <span class="text-[10px] font-bold">Muro</span>
+        </button>
+    </nav>
 
     <script>
-        // --- DATA ---
+        // --- CORE LOGIC ---
         const rawText = document.getElementById('raw-data').innerText;
         let appData = { lessons: [] };
         let activeQueue = [];
         let currentIndex = 0;
         let streak = 0;
         let isProcessing = false;
-        let currentMode = 'mix'; // 'mix' or 'study'
 
-        // --- PARSER ---
+        function cleanText(text) {
+            // Rimuove caratteri strani (es: ellissi unicode o bullet points)
+            return text.replace(/…/g, '...').replace(/•/g, '').trim();
+        }
+
         function parseData() {
             const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             let lesson = null, topic = null, root = null;
-
+            
             lines.forEach(line => {
                 if (line.startsWith('Lezione:')) {
-                    lesson = { id: appData.lessons.length, title: line.replace('Lezione:', '').trim(), topics: [] };
+                    lesson = { id: appData.lessons.length, title: cleanText(line.replace('Lezione:', '')), topics: [] };
                     appData.lessons.push(lesson);
                     topic = null; root = null;
                 } else if (line.startsWith('Argomento:')) {
-                    if (lesson) {
-                        topic = { title: line.replace('Argomento:', '').trim(), roots: [] };
-                        lesson.topics.push(topic);
-                        root = null;
+                    if (!lesson) { // Fallback se non c'è lezione definita prima
+                        lesson = { id: appData.lessons.length, title: "Generale", topics: [] };
+                        appData.lessons.push(lesson);
                     }
+                    topic = { title: cleanText(line.replace('Argomento:', '')), roots: [] };
+                    lesson.topics.push(topic);
+                    root = null;
                 } else if (line.startsWith('[ V ]') || line.startsWith('[ F ]')) {
                     if (root) {
                         const isTrue = line.startsWith('[ V ]');
-                        const text = line.substring(5).trim();
+                        const text = cleanText(line.substring(5));
                         root.items.push({ text, isTrue });
                     }
                 } else if (!line.startsWith('Listato') && !line.startsWith('Metodo:')) {
                     if (topic) {
-                        root = { text: line, items: [] };
+                        root = { text: cleanText(line), items: [] };
                         topic.roots.push(root);
                     }
                 }
             });
+            console.log("Parsed:", appData);
         }
 
-        // --- MODES & LOGIC ---
         function initGame(mode, selectedLessonIds = []) {
             activeQueue = [];
             currentIndex = 0;
-            currentMode = mode;
             streak = 0;
             updateStreak();
-
-            // 1. Build Queue
+            
+            // Collect all questions
             if (mode === 'mix') {
-                // Flatten EVERYTHING and Shuffle
-                appData.lessons.forEach(l => {
-                    l.topics.forEach(t => {
-                        t.roots.forEach(r => {
-                            r.items.forEach(item => {
-                                activeQueue.push({
-                                    lesson: l.title, topic: t.title, root: r.text,
-                                    completion: item.text, isTrue: item.isTrue
-                                });
-                            });
-                        });
-                    });
-                });
-                activeQueue.sort(() => Math.random() - 0.5);
-                document.getElementById('header-subtitle').innerText = "Modalità Mix";
-            } 
-            else if (mode === 'study') {
-                // Sequential by Root for selected lessons
-                document.getElementById('header-subtitle').innerText = "Modalità Focus";
-                const lessonsToUse = appData.lessons.filter(l => selectedLessonIds.includes(l.id));
-                
-                lessonsToUse.forEach(l => {
-                    l.topics.forEach(t => {
-                        t.roots.forEach(r => {
-                            // Add all items for this root sequentially
-                            r.items.forEach(item => {
-                                activeQueue.push({
-                                    lesson: l.title, topic: t.title, root: r.text,
-                                    completion: item.text, isTrue: item.isTrue
-                                });
-                            });
-                        });
-                    });
-                });
+                appData.lessons.forEach(l => l.topics.forEach(t => t.roots.forEach(r => r.items.forEach(i => 
+                    activeQueue.push({ lesson: l.title, topic: t.title, root: r.text, completion: i.text, isTrue: i.isTrue })
+                ))));
+                activeQueue.sort(() => Math.random() - 0.5); // Shuffle
+                document.getElementById('header-subtitle').innerText = "MIX MODE";
+            } else {
+                const lessons = appData.lessons.filter(l => selectedLessonIds.includes(l.id));
+                lessons.forEach(l => l.topics.forEach(t => t.roots.forEach(r => r.items.forEach(i => 
+                    activeQueue.push({ lesson: l.title, topic: t.title, root: r.text, completion: i.text, isTrue: i.isTrue })
+                ))));
+                document.getElementById('header-subtitle').innerText = "FOCUS MODE";
             }
-
-            if (activeQueue.length === 0) {
-                alert("Nessun dato trovato!");
-                return;
+            
+            if(activeQueue.length > 0) {
+                renderCard();
+            } else {
+                alert("Nessuna domanda trovata!");
             }
-
-            renderCard();
         }
 
         function renderCard() {
             if (currentIndex >= activeQueue.length) {
-                endGame();
+                document.getElementById('card-completion').innerText = "Sessione Completata!";
+                document.getElementById('card-root').innerText = "Ottimo lavoro 🎉";
+                confetti({ particleCount: 150, spread: 80 });
                 return;
             }
-
             const item = activeQueue[currentIndex];
-            const rootEl = document.getElementById('card-root');
+            document.getElementById('card-root').innerText = item.root;
+            
             const compEl = document.getElementById('card-completion');
-            const infoEl = document.getElementById('lesson-info');
+            // Reset animation
+            compEl.style.animation = 'none';
+            compEl.offsetHeight; /* trigger reflow */
+            compEl.style.animation = null; 
             
-            // Text Update
-            rootEl.innerText = item.root;
-            
-            // Animation for completion change
-            compEl.classList.remove('anim-enter');
-            void compEl.offsetWidth; // trigger reflow
             compEl.innerText = item.completion;
             compEl.classList.add('anim-enter');
-
-            // Info
-            infoEl.innerText = `${item.lesson} • ${item.topic}`;
-
-            // Progress
-            const pct = ((currentIndex) / activeQueue.length) * 100;
-            document.getElementById('progress-bar').style.width = `${pct}%`;
+            
+            document.getElementById('lesson-info').innerText = `${item.topic}`;
+            document.getElementById('progress-bar').style.width = `${((currentIndex) / activeQueue.length) * 100}%`;
         }
 
-        function checkAnswer(userSaysTrue) {
-            if (isProcessing) return;
+        function checkAnswer(userChoice) {
+            if (isProcessing || currentIndex >= activeQueue.length) return;
             isProcessing = true;
 
             const item = activeQueue[currentIndex];
-            const isCorrect = userSaysTrue === item.isTrue;
+            const isCorrect = userChoice === item.isTrue;
             const overlay = document.getElementById('feedback-overlay');
             const icon = document.getElementById('feedback-icon');
             const text = document.getElementById('feedback-text');
             const container = document.getElementById('card-container');
 
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
             if (isCorrect) {
                 streak++;
-                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 }, colors: ['#22c55e', '#a855f7'] });
+                confetti({ particleCount: 20, spread: 40, origin: { y: 0.7 }, startVelocity: 20 });
                 
-                // Success UI
-                overlay.classList.remove('hidden', 'bg-red-900/80');
-                overlay.classList.add('flex', 'bg-green-900/80'); // Green tint
-                icon.innerHTML = '<i class="ph-fill ph-check-circle text-green-400"></i>';
-                text.innerText = "CORRETTO";
-                text.className = "text-2xl font-bold text-green-400";
+                // Success styling
+                overlay.className = "absolute inset-0 z-50 flex flex-col items-center justify-center bg-green-900/90 backdrop-blur-sm transition-opacity duration-200 pointer-events-none rounded-3xl";
+                icon.innerHTML = '<i class="ph-fill ph-check-circle text-green-300"></i>';
+                text.innerText = "ESATTO!";
+                text.className = "text-2xl font-bold text-green-300 tracking-wider";
             } else {
                 streak = 0;
-                // Error UI
-                container.parentElement.classList.add('anim-shake');
-                overlay.classList.remove('hidden', 'bg-green-900/80');
-                overlay.classList.add('flex', 'bg-red-900/80'); // Red tint
-                icon.innerHTML = '<i class="ph-fill ph-x-circle text-red-400"></i>';
-                text.innerText = item.isTrue ? "Era VERO" : "Era FALSO";
-                text.className = "text-2xl font-bold text-red-400";
+                container.classList.add('anim-shake');
                 
-                setTimeout(() => container.parentElement.classList.remove('anim-shake'), 400);
+                // Error styling
+                overlay.className = "absolute inset-0 z-50 flex flex-col items-center justify-center bg-red-900/90 backdrop-blur-sm transition-opacity duration-200 pointer-events-none rounded-3xl";
+                icon.innerHTML = '<i class="ph-fill ph-x-circle text-red-300"></i>';
+                text.innerText = item.isTrue ? "ERA VERO" : "ERA FALSO";
+                text.className = "text-2xl font-bold text-red-300 tracking-wider";
+                
+                setTimeout(() => container.classList.remove('anim-shake'), 400);
             }
-
+            
             updateStreak();
             
-            // Animate Icon
-            requestAnimationFrame(() => { icon.classList.remove('scale-0'); icon.classList.add('scale-100'); });
+            // Icon pop animation
+            requestAnimationFrame(() => { 
+                icon.classList.remove('scale-0'); 
+                icon.classList.add('scale-100'); 
+            });
 
-            // Next
+            // Delay for next card
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
@@ -1042,111 +946,118 @@ Il conducente, in vicinanza di un posteggio riservato ai taxi...
                 currentIndex++;
                 renderCard();
                 isProcessing = false;
-            }, 1200); // Slightly faster
+            }, 900);
         }
 
-        function updateStreak() {
-            document.getElementById('streak-display').innerText = streak;
-        }
+        function updateStreak() { document.getElementById('streak-display').innerText = streak; }
 
-        function endGame() {
-            document.getElementById('card-completion').innerText = "Hai finito!";
-            document.getElementById('card-root').innerText = "Ottimo lavoro";
-            confetti({ particleCount: 200, spread: 100 });
-        }
-
-        // --- NAVIGATION & UI ---
         function setMode(mode) {
-            // Hide selection view if open
+            // Close selection panel
             document.getElementById('view-selection').style.transform = "translateY(100%)";
-            document.getElementById('view-pattern').classList.add('hidden');
-            document.getElementById('view-game').classList.remove('hidden');
-
-            // Reset Nav Styles
-            document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-purple-400', 'text-gray-500'));
-
-            if (mode === 'mix') {
-                document.getElementById('nav-mix').classList.replace('text-gray-500', 'text-purple-400');
-                initGame('mix');
-            } else if (mode === 'pattern') {
-                document.getElementById('nav-pattern').classList.replace('text-gray-500', 'text-purple-400');
+            
+            // Switch main views
+            if (mode === 'pattern') {
                 document.getElementById('view-game').classList.add('hidden');
                 document.getElementById('view-pattern').classList.remove('hidden');
-                renderPatternWall();
+                renderPattern();
+            } else {
+                document.getElementById('view-pattern').classList.add('hidden');
+                document.getElementById('view-game').classList.remove('hidden');
+            }
+            
+            // Nav Highlighting
+            const resetNav = () => document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('text-purple-400');
+                b.classList.add('text-gray-500');
+            });
+            
+            resetNav();
+            
+            if (mode === 'mix') {
+                document.getElementById('nav-mix').classList.add('text-purple-400');
+                document.getElementById('nav-mix').classList.remove('text-gray-500');
+                initGame('mix');
+            } else if (mode === 'pattern') {
+                document.getElementById('nav-pattern').classList.add('text-purple-400');
+                document.getElementById('nav-pattern').classList.remove('text-gray-500');
             }
         }
 
         function toggleSelectionView() {
             const el = document.getElementById('view-selection');
             const isOpen = el.style.transform === "translateY(0%)";
-            el.style.transform = isOpen ? "translateY(100%)" : "translateY(0%)";
             
             if (!isOpen) {
                 renderSelectionList();
-                document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-purple-400', 'text-gray-500'));
-                document.getElementById('nav-study').classList.replace('text-gray-500', 'text-purple-400');
+                el.style.transform = "translateY(0%)";
+                
+                // Highlight Nav
+                document.querySelectorAll('nav button').forEach(b => {
+                    b.classList.remove('text-purple-400');
+                    b.classList.add('text-gray-500');
+                });
+                document.getElementById('nav-study').classList.add('text-purple-400');
+                document.getElementById('nav-study').classList.remove('text-gray-500');
+            } else {
+                el.style.transform = "translateY(100%)";
+                // Revert nav highlight to current mode (simplified: default to mix)
+                setMode('mix'); 
             }
         }
 
         function renderSelectionList() {
             const container = document.getElementById('selection-list');
             container.innerHTML = '';
-            
             appData.lessons.forEach(l => {
-                const id = `lesson-${l.id}`;
                 container.innerHTML += `
-                    <label class="custom-checkbox flex items-center p-4 rounded-xl bg-[#18181b] border border-white/5 cursor-pointer active:scale-[0.98] transition-transform">
+                    <label class="custom-checkbox flex items-center p-4 rounded-xl bg-[#18181b] border border-white/5 cursor-pointer active:scale-[0.98] transition-transform shadow-sm">
                         <input type="checkbox" value="${l.id}" class="hidden" checked>
-                        <div class="w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center mr-4 transition-colors">
-                            <i class="ph-bold ph-check text-white text-xs hidden"></i>
+                        <div class="w-6 h-6 rounded-md border-2 border-gray-600 flex items-center justify-center mr-4 transition-colors">
+                            <i class="ph-bold ph-check text-white text-xs"></i>
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-sm text-gray-200">${l.title}</h3>
-                            <p class="text-xs text-gray-500">${l.topics.length} Argomenti</p>
+                            <h3 class="font-bold text-sm text-gray-200 leading-tight">${l.title}</h3>
+                            <p class="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wider">${l.topics.length} Argomenti</p>
                         </div>
-                    </label>
-                `;
+                    </label>`;
             });
         }
 
         function startStudyMode() {
-            const checkboxes = document.querySelectorAll('#selection-list input:checked');
-            const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            const selectedIds = Array.from(document.querySelectorAll('#selection-list input:checked')).map(cb => parseInt(cb.value));
+            if (selectedIds.length === 0) return alert("Seleziona almeno un argomento!");
             
-            if (selectedIds.length === 0) {
-                alert("Seleziona almeno una lezione!");
-                return;
-            }
-
             document.getElementById('view-selection').style.transform = "translateY(100%)";
-            document.getElementById('view-game').classList.remove('hidden');
             document.getElementById('view-pattern').classList.add('hidden');
+            document.getElementById('view-game').classList.remove('hidden');
             
             initGame('study', selectedIds);
         }
 
-        function renderPatternWall() {
+        function renderPattern() {
             const container = document.getElementById('view-pattern');
-            if(container.innerHTML.trim().length > 100) return; // Avoid re-render
+            // Optimization: Don't re-render if populated
+            if(container.innerHTML.trim().length > 50) return;
 
             let html = '';
             appData.lessons.forEach(l => {
                 l.topics.forEach(t => {
-                    html += `<div class="mb-8">`;
-                    html += `<h2 class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-3 pl-2 border-l-2 border-purple-500">${t.title}</h2>`;
+                    html += `<div class="mb-6">
+                        <h3 class="text-xs font-bold text-purple-400 uppercase mb-2 pl-2 border-l-2 border-purple-500">${t.title}</h3>`;
+                    
                     t.roots.forEach(r => {
-                        html += `<div class="bg-[#18181b] rounded-2xl p-5 mb-4 border border-white/5">
-                            <p class="text-gray-400 text-sm mb-3 pb-2 border-b border-white/5">${r.text}</p>`;
-                        const sorted = [...r.items].sort((a,b) => b.isTrue - a.isTrue);
-                        sorted.forEach(item => {
-                            const color = item.isTrue ? 'text-green-400' : 'text-red-400';
-                            const icon = item.isTrue ? 'ph-check-circle' : 'ph-x-circle';
-                            html += `<div class="flex gap-3 mb-2 items-start">
-                                <i class="ph-fill ${icon} ${color} mt-0.5 shrink-0"></i>
-                                <span class="text-sm text-gray-200 leading-snug">${item.text}</span>
-                            </div>`;
+                        html += `<div class="bg-[#18181b] rounded-xl p-4 mb-3 border border-white/5 shadow-sm">
+                            <p class="text-sm text-gray-400 mb-3 border-b border-white/5 pb-2">${r.text}</p>
+                            <div class="space-y-2">`;
+                        
+                        r.items.forEach(i => {
+                             html += `
+                                <div class="flex gap-3 items-start">
+                                    <i class="ph-fill ${i.isTrue ? 'ph-check-circle text-green-500' : 'ph-x-circle text-red-500'} mt-0.5 text-lg shrink-0"></i>
+                                    <span class="text-sm text-gray-200 leading-snug">${i.text}</span>
+                                </div>`;
                         });
-                        html += `</div>`;
+                        html += `</div></div>`;
                     });
                     html += `</div>`;
                 });
@@ -1157,14 +1068,8 @@ Il conducente, in vicinanza di un posteggio riservato ai taxi...
         // --- INIT ---
         window.onload = () => {
             parseData();
-            
-            // Attach Events
-            document.getElementById('btn-true').onclick = () => checkAnswer(true);
-            document.getElementById('btn-false').onclick = () => checkAnswer(false);
-            
-            initGame('mix'); // Default Start
+            initGame('mix');
         };
-
     </script>
 </body>
 </html>
