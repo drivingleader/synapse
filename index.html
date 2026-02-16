@@ -166,6 +166,13 @@
             border-radius: 50%;
             flex-direction: column;
             overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .node-core.active {
+            border-color: #fff;
+            box-shadow: 0 0 60px var(--primary);
+            animation: pulse-border 1.5s infinite;
         }
 
         .node-core img {
@@ -189,6 +196,10 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             user-select: none;
             line-height: 1.3;
+        }
+
+        .node-option:active {
+            transform: translate(-50%, -50%) scale(0.95);
         }
 
         .node-option.connected {
@@ -215,6 +226,7 @@
 
         /* --- ANIMATIONS --- */
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
+        @keyframes pulse-border { 0% { box-shadow: 0 0 30px var(--primary); } 50% { box-shadow: 0 0 60px var(--primary), 0 0 10px #fff; } 100% { box-shadow: 0 0 30px var(--primary); } }
         @keyframes shake {
             10%, 90% { transform: translate(-52%, -50%); }
             20%, 80% { transform: translate(-48%, -50%); }
@@ -263,7 +275,7 @@
         </div>
 
         <div class="footer">
-            <div id="tutorial-txt" class="tutorial-hint">Collega le affermazioni VERE al nucleo</div>
+            <div id="tutorial-txt" class="tutorial-hint">Tocca il NUCLEO per attivare il collegamento</div>
             <div id="context-chip" class="context-chip">CARICAMENTO DATI...</div>
         </div>
     </div>
@@ -281,9 +293,6 @@
          * IMAGE ASSETS MAPPING
          * =========================================
          */
-        
-        // Maps IDs found in text e.g. (001) to URLs.
-        // Fallback URLs used for preview. If local files exist, replace URLs with relative paths.
         const IMAGE_MAP = {
             "001": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Italian_traffic_signs_-_pericolo_-_strada_deformata.svg/240px-Italian_traffic_signs_-_pericolo_-_strada_deformata.svg.png",
             "002": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Italian_traffic_signs_-_pericolo_-_dosso.svg/240px-Italian_traffic_signs_-_pericolo_-_dosso.svg.png",
@@ -358,6 +367,7 @@ La corsia può...
 [ V ] ...essere riservata alla circolazione di alcune categorie di veicoli (taxi, autobus, ecc.)
 [ V ] ...essere di accelerazione
 [ V ] ...essere di decelerazione
+
 La corsia di accelerazione...
 [ V ] ...facilita l'ingresso dei veicoli in autostrada o su strade extraurbane principali
 [ V ] ...serve ad entrare correttamente in autostrada
@@ -1187,8 +1197,6 @@ In presenza del segnale raffigurato  (007) ...
                 const match = rootText.match(/\((\d{3})\)/);
                 if (match) {
                     imageId = match[1];
-                    // Clean text (optional: keep code or remove it)
-                    // rootText = rootText.replace(/\(\d{3}\)/, '').trim(); 
                 }
 
                 return {
@@ -1225,13 +1233,13 @@ In presenza del segnale raffigurato  (007) ...
                 this.streak = 0;
                 this.currentNodes = [];
                 this.coreNode = null;
-                this.activeLine = null; // { x, y } of pointer
-                this.connections = []; // { from, to, type }
+                this.connections = []; 
                 this.completedTrueCount = 0;
                 this.totalTrueCount = 0;
 
-                // Physics/Animation
-                this.animId = null;
+                // Interaction State
+                this.isConnecting = false;
+                this.pointerPos = { x: 0, y: 0 };
                 this.center = { x: window.innerWidth/2, y: window.innerHeight/2 };
 
                 this.initListeners();
@@ -1244,6 +1252,8 @@ In presenza del segnale raffigurato  (007) ...
                 this.canvas.width = window.innerWidth;
                 this.canvas.height = window.innerHeight;
                 this.center = { x: window.innerWidth/2, y: window.innerHeight/2 };
+                
+                // FORCE RE-CENTER CORE
                 if (this.coreNode) {
                     this.coreNode.x = this.center.x;
                     this.coreNode.y = this.center.y;
@@ -1254,21 +1264,29 @@ In presenza del segnale raffigurato  (007) ...
             initListeners() {
                 window.addEventListener('resize', () => this.resize());
                 
-                // Mouse/Touch for drawing line
+                // Track mouse/touch globally for line drawing
                 const handleMove = (e) => {
-                    const x = e.clientX || e.touches[0].clientX;
-                    const y = e.clientY || e.touches[0].clientY;
-                    this.activeLine = { x, y };
+                    const x = e.clientX || (e.touches && e.touches[0].clientX);
+                    const y = e.clientY || (e.touches && e.touches[0].clientY);
+                    if (x && y) this.pointerPos = { x, y };
                 };
                 
-                const handleEnd = () => {
-                    this.activeLine = null;
-                };
-
                 this.container.addEventListener('mousemove', handleMove);
                 this.container.addEventListener('touchmove', handleMove);
-                window.addEventListener('mouseup', handleEnd);
-                window.addEventListener('touchend', handleEnd);
+
+                // Click background to cancel
+                this.container.addEventListener('click', (e) => {
+                    if (e.target === this.container || e.target === this.canvas) {
+                        this.cancelConnection();
+                    }
+                });
+            }
+
+            cancelConnection() {
+                this.isConnecting = false;
+                if (this.coreNode && this.coreNode.el) {
+                    this.coreNode.el.classList.remove('active');
+                }
             }
 
             startLevel() {
@@ -1276,8 +1294,9 @@ In presenza del segnale raffigurato  (007) ...
                 this.container.querySelectorAll('.node').forEach(el => el.remove());
                 this.connections = [];
                 this.currentNodes = [];
+                this.isConnecting = false;
 
-                // Pick Level (Random or Sequential)
+                // Pick Level
                 const levelData = this.levels[Math.floor(Math.random() * this.levels.length)];
                 
                 // Setup Core
@@ -1287,40 +1306,40 @@ In presenza del segnale raffigurato  (007) ...
                 
                 this.contextEl.textContent = levelData.topic.toUpperCase();
 
-                // Setup Options (Max 6 to avoid clutter)
-                // Ensure mixed true/false
+                // Setup Options
                 let options = levelData.answers.sort(() => 0.5 - Math.random()).slice(0, 6);
-                
                 this.totalTrueCount = options.filter(o => o.isTrue).length;
                 this.completedTrueCount = 0;
                 
-                // If no true answers in slice, force one
                 if (this.totalTrueCount === 0 && levelData.answers.some(a=>a.isTrue)) {
                    options[0] = levelData.answers.find(a=>a.isTrue);
                    this.totalTrueCount = 1;
                 }
 
                 // Spawn positions (Orbit)
-                const radius = Math.min(window.innerWidth, window.innerHeight) * 0.35;
+                // Use smaller radius on mobile to prevent overflow
+                const isMobile = window.innerWidth < 600;
+                const radius = Math.min(window.innerWidth, window.innerHeight) * (isMobile ? 0.28 : 0.35);
                 const angleStep = (2 * Math.PI) / options.length;
 
                 options.forEach((opt, index) => {
-                    const angle = index * angleStep - Math.PI/2; // Start top
+                    const angle = index * angleStep - Math.PI/2; 
                     const node = this.createNode(opt.text, false, opt);
                     
-                    // Initial Position
-                    node.x = this.center.x + Math.cos(angle) * radius;
-                    node.y = this.center.y + Math.sin(angle) * radius;
-                    
-                    // Animation props
                     node.baseAngle = angle;
                     node.radius = radius;
                     node.floatOffset = Math.random() * 100;
+                    
+                    // Initial pos
+                    node.x = this.center.x + Math.cos(angle) * radius;
+                    node.y = this.center.y + Math.sin(angle) * radius;
                     
                     this.currentNodes.push(node);
                 });
 
                 this.updateProgressBar();
+                // Force initial position update
+                this.resize();
             }
 
             createNode(text, isCore, data = null) {
@@ -1330,12 +1349,7 @@ In presenza del segnale raffigurato  (007) ...
                 if (isCore && data.imageId && IMAGE_MAP[data.imageId]) {
                     const img = document.createElement('img');
                     img.src = IMAGE_MAP[data.imageId];
-                    // Also try local path fallback logic by simply setting src 
-                    // (in a real app we'd need checks, here we just use what we have in map)
-                    
-                    // Clean text (remove the code for display)
                     const displayText = text.replace(/\(\d{3}\)/, '').trim();
-                    
                     el.appendChild(img);
                     const span = document.createElement('span');
                     span.textContent = displayText;
@@ -1353,27 +1367,33 @@ In presenza del segnale raffigurato  (007) ...
                     connected: false
                 };
 
-                if (isCore) {
-                    // Interaction: Start drag
-                    const startDrag = (e) => {
-                        e.preventDefault();
-                        const x = e.clientX || e.touches[0].clientX;
-                        const y = e.clientY || e.touches[0].clientY;
-                        this.activeLine = { x, y };
-                    };
-                    el.addEventListener('mousedown', startDrag);
-                    el.addEventListener('touchstart', startDrag);
-                } else {
-                    // Interaction: Receive drop
-                    const handleHit = () => this.checkConnection(nodeObj);
-                    el.addEventListener('mouseup', handleHit);
-                    el.addEventListener('touchend', (e) => {
-                        // For touch, we need to check if the touch ended ON this element
-                        const touch = e.changedTouches[0];
-                        const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                        if (target === el || el.contains(target)) handleHit();
-                    });
-                }
+                // CLICK INTERACTION LOGIC
+                const handleClick = (e) => {
+                    e.stopPropagation(); // Prevent background click
+                    
+                    if (isCore) {
+                        // Toggle Connection Mode
+                        this.isConnecting = !this.isConnecting;
+                        if (this.isConnecting) {
+                            el.classList.add('active');
+                            // Initialize pointer pos to center to avoid jump
+                            this.pointerPos = { x: this.center.x, y: this.center.y };
+                        } else {
+                            el.classList.remove('active');
+                        }
+                    } else {
+                        // Option Click
+                        if (this.isConnecting) {
+                            this.checkConnection(nodeObj);
+                        }
+                    }
+                };
+
+                el.addEventListener('click', handleClick);
+                // Simple touch support mapping to click
+                el.addEventListener('touchend', (e) => {
+                    // prevent ghost clicks if needed, but standard click usually works fine
+                });
 
                 this.container.appendChild(el);
                 this.updateDOMPos(nodeObj);
@@ -1381,39 +1401,31 @@ In presenza del segnale raffigurato  (007) ...
             }
 
             checkConnection(targetNode) {
-                if (!this.activeLine) return; // Must be dragging from core
-                if (targetNode.connected) return; // Already done
+                if (!this.isConnecting) return;
+                if (targetNode.connected) return; 
 
                 if (targetNode.data.isTrue) {
-                    // SUCCESS
                     this.handleSuccess(targetNode);
                 } else {
-                    // FAILURE
                     this.handleFailure(targetNode);
                 }
                 
-                this.activeLine = null; // Stop drawing line
+                // After attempt, reset connection mode
+                this.cancelConnection();
             }
 
             handleSuccess(node) {
                 node.connected = true;
                 node.el.classList.add('connected');
-                
-                // Add permanent connection visual
                 this.connections.push({ node: node });
-
                 this.score += 10 + (this.streak * 2);
                 this.streak++;
                 this.completedTrueCount++;
-                
-                // FX
                 if (navigator.vibrate) navigator.vibrate(50);
                 
-                // Check Level Complete
                 if (this.completedTrueCount >= this.totalTrueCount) {
                     setTimeout(() => this.levelComplete(), 800);
                 }
-                
                 this.updateUI();
             }
 
@@ -1421,14 +1433,9 @@ In presenza del segnale raffigurato  (007) ...
                 node.el.classList.add('wrong');
                 this.streak = 0;
                 this.score = Math.max(0, this.score - 5);
-                
                 this.showOverlay("NOPE", "error");
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-
-                setTimeout(() => {
-                    node.el.classList.remove('wrong');
-                }, 500);
-
+                setTimeout(() => { node.el.classList.remove('wrong'); }, 500);
                 this.updateUI();
             }
 
@@ -1436,7 +1443,7 @@ In presenza del segnale raffigurato  (007) ...
                 this.showOverlay("COMPLETO", "success");
                 setTimeout(() => {
                     this.startLevel();
-                    this.msgOverlay.className = "overlay-msg"; // Hide
+                    this.msgOverlay.className = "overlay-msg";
                 }, 1500);
             }
 
@@ -1460,33 +1467,36 @@ In presenza del segnale raffigurato  (007) ...
             }
 
             updateDOMPos(node) {
-                node.el.style.transform = `translate(-50%, -50%) translate(${node.x}px, ${node.y}px)`;
+                // Ensure absolute centering logic
                 node.el.style.left = `${node.x}px`;
                 node.el.style.top = `${node.y}px`;
+                // Keep the translate to center the element on its coords
                 node.el.style.transform = `translate(-50%, -50%)`;
             }
 
             loop() {
                 const now = Date.now();
-                
-                // Clear Canvas
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Safety Re-center (in case of weird layout shifts)
+                if (this.coreNode && (Math.abs(this.coreNode.x - this.center.x) > 1 || Math.abs(this.coreNode.y - this.center.y) > 1)) {
+                    this.coreNode.x = this.center.x;
+                    this.coreNode.y = this.center.y;
+                    this.updateDOMPos(this.coreNode);
+                }
 
                 // Animate Floating Options
                 this.currentNodes.forEach(node => {
                     if (!node.connected) {
-                        // Gentle float
                         const t = now * 0.001;
                         const floatX = Math.sin(t + node.floatOffset) * 10;
                         const floatY = Math.cos(t * 0.8 + node.floatOffset) * 10;
-                        
-                        // Update position based on orbit + float
                         node.x = this.center.x + Math.cos(node.baseAngle) * node.radius + floatX;
                         node.y = this.center.y + Math.sin(node.baseAngle) * node.radius + floatY;
                         this.updateDOMPos(node);
                     } else {
-                        // Pull closer if connected (implosion effect)
-                        const targetR = node.radius * 0.6; // Get closer to core
+                        // Implosion effect
+                        const targetR = node.radius * 0.6; 
                         const dx = (this.center.x + Math.cos(node.baseAngle) * targetR) - node.x;
                         const dy = (this.center.y + Math.sin(node.baseAngle) * targetR) - node.y;
                         node.x += dx * 0.1;
@@ -1495,17 +1505,15 @@ In presenza del segnale raffigurato  (007) ...
                     }
                 });
 
-                // Draw Connections
-                // 1. Permanent (Success) connections
+                // Draw Completed Connections
                 this.ctx.lineWidth = 3;
                 this.connections.forEach(conn => {
                     this.ctx.beginPath();
                     this.ctx.moveTo(this.center.x, this.center.y);
                     this.ctx.lineTo(conn.node.x, conn.node.y);
-                    this.ctx.strokeStyle = '#4ade80'; // Success Green
+                    this.ctx.strokeStyle = '#4ade80'; 
                     this.ctx.stroke();
                     
-                    // Little particle flow
                     const t = (now % 1000) / 1000;
                     const px = this.center.x + (conn.node.x - this.center.x) * t;
                     const py = this.center.y + (conn.node.y - this.center.y) * t;
@@ -1515,27 +1523,32 @@ In presenza del segnale raffigurato  (007) ...
                     this.ctx.fill();
                 });
 
-                // 2. Active Drag Line
-                if (this.activeLine) {
+                // Draw Active Line (New Interaction)
+                if (this.isConnecting) {
                     this.ctx.beginPath();
                     this.ctx.moveTo(this.center.x, this.center.y);
-                    this.ctx.lineTo(this.activeLine.x, this.activeLine.y);
+                    this.ctx.lineTo(this.pointerPos.x, this.pointerPos.y);
                     this.ctx.strokeStyle = '#22d3ee'; // Cyan
                     this.ctx.lineCap = 'round';
                     this.ctx.lineWidth = 4;
-                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowBlur = 15;
                     this.ctx.shadowColor = '#22d3ee';
                     this.ctx.stroke();
                     this.ctx.shadowBlur = 0;
+                    
+                    // Pointer circle
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.pointerPos.x, this.pointerPos.y, 6, 0, Math.PI*2);
+                    this.ctx.fillStyle = '#22d3ee';
+                    this.ctx.fill();
                 }
 
                 requestAnimationFrame(() => this.loop());
             }
         }
 
-        // Init
         window.onload = () => {
-            const game = new Game();
+            new Game();
         };
 
     </script>
